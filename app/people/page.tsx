@@ -12,7 +12,9 @@ import {
   UserGroupIcon, 
   ChevronRightIcon,
   MagnifyingGlassIcon,
-  XMarkIcon
+  XMarkIcon,
+  UsersIcon,
+  ArrowUpRightIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -23,14 +25,12 @@ export default function PeopleListPage() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 로그인 체크
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
 
-  // 데이터 구독
   useEffect(() => {
     if (!user) return;
     const unsubPeople = subscribePeople(user.uid, setPeople);
@@ -41,9 +41,14 @@ export default function PeopleListPage() {
     };
   }, [user]);
 
-  if (loading || !user) return null;
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#0B0E14]">
+        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-  // 인맥별 데이터 가공
   const peopleSummary: PersonSummary[] = people.map(p => {
     const pEvents = events.filter(e => e.personId === p.id);
     const totalGiven = pEvents.filter(e => e.direction === "give").reduce((s, e) => s + e.amount, 0);
@@ -61,66 +66,83 @@ export default function PeopleListPage() {
   );
 
   return (
-    <div className="p-6 pb-24 animate-fade-in bg-white min-h-screen">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">내 인맥 관리</h1>
-
-      {/* 검색바 */}
-      <div className="relative mb-8 group">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+    <div className="p-6 pb-28 animate-up bg-[#0B0E14] min-h-screen">
+      {/* 럭셔리 다크 헤더 */}
+      <header className="flex items-center justify-between mb-10 px-1">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-indigo-400">
+            <UsersIcon className="w-7 h-7" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white tracking-tight">지명 내역</h1>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Networking Asset Profiling</p>
+          </div>
         </div>
+      </header>
+
+      {/* 프리미엄 검색바 */}
+      <div className="relative mb-8 group">
+        <div className="absolute inset-0 bg-indigo-500/5 blur-2xl group-focus-within:bg-indigo-500/10 transition-all duration-700"></div>
+        <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
         <input 
           type="text" 
           placeholder="지인 이름을 검색해 보세요..."
-          className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 font-medium"
+          className="relative w-full h-16 bg-[#1E293B]/60 backdrop-blur-xl border border-white/5 rounded-[24px] pl-14 pr-12 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-indigo-500/30 transition-all"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {searchTerm && (
           <button 
             onClick={() => setSearchTerm("")}
-            className="absolute inset-y-0 right-4 flex items-center text-gray-400 h-full px-1"
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon className="w-6 h-6" />
           </button>
         )}
       </div>
 
-      {/* 지인 리스트 */}
+      {/* 지인 리스트 (Luxury Row) */}
       <div className="space-y-4">
         {filteredPeople.length === 0 ? (
-          <div className="py-20 text-center opacity-50">
-            <UserGroupIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-sm">
-              {searchTerm ? `'${searchTerm}'에 대한 검색 결과가 없습니다.` : "등록된 지인이 없습니다."}
+          <div className="py-24 text-center premium-card border-dashed border-white/5 bg-transparent">
+            <UserGroupIcon className="w-14 h-14 mx-auto mb-4 text-slate-800" />
+            <p className="text-[11px] text-slate-600 font-black tracking-widest uppercase italic">
+              {searchTerm ? "No search results match" : "No network data available"}
             </p>
           </div>
         ) : (
-          filteredPeople.map((p) => (
-            <Link key={p.id} href={`/people/${p.id}`}>
-              <div className="card flex items-center justify-between group hover:border-primary transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-3xl bg-gray-50 flex items-center justify-center text-primary font-black text-xl group-hover:bg-primary group-hover:text-white transition-all shadow-sm border border-gray-100 group-hover:border-primary">
+          filteredPeople.map((p, idx) => (
+            <Link key={p.id} href={`/people/${p.id}`} className={`block animate-up`} style={{ animationDelay: `${idx * 0.05}s` }}>
+              <div className="premium-card flex items-center justify-between group hover:bg-white/10 hover:border-white/10 active:scale-95 transition-all">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1E293B] to-[#0F172A] border border-white/5 flex items-center justify-center text-indigo-400 font-black text-xl group-hover:from-indigo-600 group-hover:to-indigo-400 group-hover:text-white transition-all shadow-xl">
                     {p.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-gray-900 flex items-center gap-2 text-lg">
-                      {p.name}
-                      <span className="text-[10px] text-gray-400 font-bold bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">{p.relationship}</span>
-                    </h3>
-                    <div className="flex gap-4 mt-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-black text-white text-lg tracking-tight">
+                        {p.name}
+                      </h3>
+                      <span className="text-[9px] font-black text-slate-500 bg-white/5 px-2 py-0.5 rounded-lg border border-white/5 group-hover:text-slate-300">
+                        {p.relationship}
+                      </span>
+                    </div>
+                    <div className="flex gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-gray-300 uppercase tracking-tighter">보낸 돈</span>
-                        <p className="text-sm font-black text-indigo-500">-{p.totalGiven.toLocaleString()}원</p>
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">OUT</span>
+                        <p className="text-sm font-black text-indigo-400">-{p.totalGiven.toLocaleString()}</p>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-gray-300 uppercase tracking-tighter">받은 돈</span>
-                        <p className="text-sm font-black text-rose-500">+{p.totalReceived.toLocaleString()}원</p>
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">IN</span>
+                        <p className="text-sm font-black text-rose-400">+{p.totalReceived.toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                <ChevronRightIcon className="w-5 h-5 text-gray-200 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                <div className="flex flex-col items-end gap-2">
+                  <ArrowUpRightIcon className="w-5 h-5 text-slate-700 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <span className="text-[9px] font-black text-slate-700 italic">PROFILED</span>
+                </div>
               </div>
             </Link>
           ))
