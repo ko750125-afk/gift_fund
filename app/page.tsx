@@ -15,7 +15,8 @@ import {
   UserCircleIcon,
   PlusCircleIcon,
   MagnifyingGlassIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChartBarIcon
 } from "@heroicons/react/24/outline";
 import EditEventModal from "@/components/EditEventModal";
 
@@ -75,6 +76,19 @@ export default function Dashboard() {
     .filter(e => e.direction === "receive")
     .reduce((sum, e) => sum + e.amount, 0);
 
+  // 카테고리별 통계 계산 (낸 금액 기준)
+  const categoryStats = events
+    .filter(e => e.direction === "give")
+    .reduce((acc, e) => {
+      acc[e.type] = (acc[e.type] || 0) + e.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const budgetItems = Object.entries(categoryStats)
+    .sort((a, b) => b[1] - a[1]); // 금액 큰 순으로 정렬
+
+  const maxCategoryAmount = Math.max(...Object.values(categoryStats), 1);
+
   // 검색어 필터링 실시간 반영
   const filteredEvents = events.filter(e => {
     const personName = peopleMap.get(e.personId)?.toLowerCase() || "";
@@ -117,6 +131,44 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* 카테고리별 지출 통계 */}
+      {budgetItems.length > 0 && (
+        <div className="mb-10 animate-fade-in stagger-1">
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <ChartBarIcon className="w-5 h-5 text-indigo-500" />
+            <h2 className="text-lg font-bold text-gray-800">항목별 지출 현황</h2>
+          </div>
+          
+          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
+            {budgetItems.map(([type, amount], idx) => {
+              const percentage = (amount / maxCategoryAmount) * 100;
+              const barColors = [
+                "bg-indigo-500", "bg-purple-500", "bg-rose-500", "bg-amber-500", "bg-emerald-500"
+              ];
+              const colorClass = barColors[idx % barColors.length];
+
+              return (
+                <div key={type} className="group">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
+                      {type}
+                    </span>
+                    <span className="text-sm font-black text-gray-900">{amount.toLocaleString()}원</span>
+                  </div>
+                  <div className="h-3 w-full bg-gray-50 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${colorClass} rounded-full transition-all duration-1000 ease-out`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 검색바 */}
       <div className="relative mb-8 group">
