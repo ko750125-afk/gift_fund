@@ -133,42 +133,51 @@ export default function Dashboard() {
       </div>
 
       {/* 카테고리별 지출 통계 */}
-      {budgetItems.length > 0 && (
-        <div className="mb-10 animate-fade-in stagger-1">
-          <div className="flex items-center gap-2 mb-4 px-1">
-            <ChartBarIcon className="w-5 h-5 text-indigo-500" />
-            <h2 className="text-lg font-bold text-gray-800">항목별 지출 현황</h2>
-          </div>
-          
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5">
-            {budgetItems.map(([type, amount], idx) => {
-              const percentage = (amount / maxCategoryAmount) * 100;
-              const barColors = [
-                "bg-indigo-500", "bg-purple-500", "bg-rose-500", "bg-amber-500", "bg-emerald-500"
-              ];
-              const colorClass = barColors[idx % barColors.length];
-
-              return (
-                <div key={type} className="group">
-                  <div className="flex justify-between items-end mb-2">
-                    <span className="text-sm font-bold text-gray-700 flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
-                      {type}
-                    </span>
-                    <span className="text-sm font-black text-gray-900">{amount.toLocaleString()}원</span>
-                  </div>
-                  <div className="h-3 w-full bg-gray-50 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${colorClass} rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      <div className="mb-10 animate-fade-in stagger-1">
+        <div className="flex items-center gap-2 mb-4 px-1">
+          <ChartBarIcon className="w-5 h-5 text-indigo-500" />
+          <h2 className="text-lg font-bold text-gray-800">지출 분석 리포트</h2>
         </div>
-      )}
+        
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm min-h-[160px] flex flex-col justify-center">
+          {budgetItems.length > 0 ? (
+            <div className="space-y-5">
+              {budgetItems.map(([type, amount], idx) => {
+                const percentage = (amount / maxCategoryAmount) * 100;
+                const barColors = [
+                  "bg-indigo-500", "bg-purple-500", "bg-rose-500", "bg-amber-500", "bg-emerald-500"
+                ];
+                const colorClass = barColors[idx % barColors.length];
+
+                return (
+                  <div key={type} className="group">
+                    <div className="flex justify-between items-end mb-2">
+                      <span className="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                        <span className={`w-2 h-2 rounded-full ${colorClass}`}></span>
+                        {type}
+                      </span>
+                      <span className="text-sm font-black text-gray-900">{amount.toLocaleString()}원</span>
+                    </div>
+                    <div className="h-3 w-full bg-gray-50 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${colorClass} rounded-full transition-all duration-1000 ease-out`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="bg-gray-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <ChartBarIcon className="w-6 h-6 text-gray-300" />
+              </div>
+              <p className="text-sm text-gray-400 font-medium">낸 내역(지출)을 등록하시면<br/>항목별 통계 그래프가 자동으로 생성됩니다.</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* 검색바 */}
       <div className="relative mb-8 group">

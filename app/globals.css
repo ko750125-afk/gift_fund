@@ -47,6 +47,10 @@ body {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+
 /* 카드 스타일 */
 .card {
   background: white;
