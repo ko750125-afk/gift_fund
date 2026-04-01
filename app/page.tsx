@@ -1,65 +1,187 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useAuth } from "@/context/AuthContext";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { 
+  subscribeEvents, 
+  subscribePeople, 
+  downloadAsCSV 
+} from "@/lib/db";
+import { EventRecord, Person } from "@/types";
+import { 
+  ArrowDownTrayIcon, 
+  ArrowsUpDownIcon,
+  UserCircleIcon,
+  PlusCircleIcon
+} from "@heroicons/react/24/outline";
+import EditEventModal from "@/components/EditEventModal";
+
+export default function Dashboard() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [events, setEvents] = useState<EventRecord[]>([]);
+  const [peopleMap, setPeopleMap] = useState<Map<string, string>>(new Map());
+  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // 편집 모달 활성화 관련 상태
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
+
+  // 로그인 체크
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // 데이터 구독 (실시간)
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubPeople = subscribePeople(user.uid, (people) => {
+      const pMap = new Map();
+      people.forEach(p => pMap.set(p.id, p.name));
+      setPeopleMap(pMap);
+    });
+
+    const unsubEvents = subscribeEvents(user.uid, sortBy, (data) => {
+      setEvents(data);
+    });
+
+    return () => {
+      unsubPeople();
+      unsubEvents();
+    };
+  }, [user, sortBy]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // 총액 계산
+  const totalGiven = events
+    .filter(e => e.direction === "give")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const totalReceived = events
+    .filter(e => e.direction === "receive")
+    .reduce((sum, e) => sum + e.amount, 0);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="p-6 pb-24 animate-fade-in">
+      {/* 상단 헤더 */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <p className="text-sm text-gray-500">반가워요, 대표님!</p>
+          <h1 className="text-2xl font-bold text-gray-900">경조사 대시보드</h1>
+        </div>
+        <button 
+          onClick={() => downloadAsCSV(user.uid)}
+          className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+          title="엑셀 다운로드"
+        >
+          <ArrowDownTrayIcon className="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
+
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="bg-indigo-50 p-4 rounded-3xl border border-indigo-100">
+          <p className="text-xs text-indigo-600 font-semibold mb-1">내가 보낸 총액</p>
+          <p className="text-xl font-bold text-indigo-900">
+            {totalGiven.toLocaleString()}원
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="bg-rose-50 p-4 rounded-3xl border border-rose-100">
+          <p className="text-xs text-rose-600 font-semibold mb-1">내가 받은 총액</p>
+          <p className="text-xl font-bold text-rose-900">
+            {totalReceived.toLocaleString()}원
+          </p>
         </div>
-      </main>
+      </div>
+
+      {/* 최근 기록 타이틀 & 정렬 */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-800">최근 경조사 기록</h2>
+        <button 
+          onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
+          className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition-all"
+        >
+          <ArrowsUpDownIcon className="w-3.5 h-3.5" />
+          {sortBy === "date" ? "날짜순" : "금액순"}
+        </button>
+      </div>
+
+      {/* 기록 리스트 */}
+      <div className="space-y-3">
+        {events.length === 0 ? (
+          <div className="py-20 text-center">
+            <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <PlusCircleIcon className="w-8 h-8 text-gray-300" />
+            </div>
+            <p className="text-gray-400">아직 등록된 기록이 없습니다.<br/>하단 + 버튼으로 시작해 보세요!</p>
+          </div>
+        ) : (
+          events.map((event) => (
+            <div 
+              key={event.id} 
+              className="card flex items-center justify-between border-l-4 cursor-pointer active:scale-[0.98] transition-transform" 
+              style={{
+                borderLeftColor: event.direction === "give" ? "#4F46E5" : "#EC4899"
+              }}
+              onClick={() => {
+                setSelectedEvent(event);
+                setIsEditModalOpen(true);
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`p-2.5 rounded-2xl ${event.direction === "give" ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'}`}>
+                  <UserCircleIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/people/${event.personId}`);
+                      }}
+                      className="font-bold text-gray-900 hover:text-primary transition-colors underline decoration-gray-200 underline-offset-4 decoration-2"
+                    >
+                      {peopleMap.get(event.personId) || "알 수 없음"}
+                    </button>
+                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded uppercase font-bold">{event.type}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{event.date}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className={`font-bold ${event.direction === "give" ? 'text-indigo-600' : 'text-rose-600'}`}>
+                  {event.direction === "give" ? "-" : "+"}{event.amount.toLocaleString()}원
+                </p>
+                {event.memo && <p className="text-[10px] text-gray-400 truncate max-w-[100px] mt-0.5 font-medium italic">"{event.memo}"</p>}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* 편집 모달 */}
+      <EditEventModal 
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedEvent(null);
+        }}
+        event={selectedEvent}
+        personName={selectedEvent ? (peopleMap.get(selectedEvent.personId) || "알 수 없음") : ""}
+      />
     </div>
   );
 }
+
+// 아이콘 임포트 에러 방지 (PlusCircleIcon이 heroicons/react/24/outline에 있음)
