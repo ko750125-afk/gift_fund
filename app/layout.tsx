@@ -18,6 +18,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (window.trustedTypes && window.trustedTypes.createPolicy) {
+                if (!window.trustedTypes.defaultPolicy) {
+                  window.trustedTypes.createPolicy('default', {
+                    createHTML: (string) => string,
+                    createScriptURL: (string) => string,
+                    createScript: (string) => string,
+                  });
+                }
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <AuthProvider>
           <div className="app-container">
