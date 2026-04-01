@@ -13,7 +13,9 @@ import {
   ArrowDownTrayIcon, 
   ArrowsUpDownIcon,
   UserCircleIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import EditEventModal from "@/components/EditEventModal";
 
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const [peopleMap, setPeopleMap] = useState<Map<string, string>>(new Map());
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   
   // 편집 모달 활성화 관련 상태
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -72,6 +75,16 @@ export default function Dashboard() {
     .filter(e => e.direction === "receive")
     .reduce((sum, e) => sum + e.amount, 0);
 
+  // 검색어 필터링 실시간 반영
+  const filteredEvents = events.filter(e => {
+    const personName = peopleMap.get(e.personId)?.toLowerCase() || "";
+    const type = e.type.toLowerCase();
+    const memo = (e.memo || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+    
+    return personName.includes(search) || type.includes(search) || memo.includes(search);
+  });
+
   return (
     <div className="p-6 pb-24 animate-fade-in">
       {/* 상단 헤더 */}
@@ -105,6 +118,28 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* 검색바 */}
+      <div className="relative mb-8 group">
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+        </div>
+        <input 
+          type="text" 
+          placeholder="이름이나 '결혼식' 같은 키워드로 검색..."
+          className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 font-medium"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => setSearchTerm("")}
+            className="absolute inset-y-0 right-4 flex items-center text-gray-400 h-full px-1"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
       {/* 최근 기록 타이틀 & 정렬 */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-800">최근 경조사 기록</h2>
@@ -119,15 +154,17 @@ export default function Dashboard() {
 
       {/* 기록 리스트 */}
       <div className="space-y-3">
-        {events.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <div className="py-20 text-center">
             <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <PlusCircleIcon className="w-8 h-8 text-gray-300" />
             </div>
-            <p className="text-gray-400">아직 등록된 기록이 없습니다.<br/>하단 + 버튼으로 시작해 보세요!</p>
+            <p className="text-gray-400">
+              {searchTerm ? `'${searchTerm}'에 대한 검색 결과가 없습니다.` : "아직 등록된 기록이 없습니다. 하단 + 버튼으로 시작해 보세요!"}
+            </p>
           </div>
         ) : (
-          events.map((event) => (
+          filteredEvents.map((event) => (
             <div 
               key={event.id} 
               className="card flex items-center justify-between border-l-4 cursor-pointer active:scale-[0.98] transition-transform" 

@@ -11,7 +11,8 @@ import { Person, EventRecord, PersonSummary } from "@/types";
 import { 
   UserGroupIcon, 
   ChevronRightIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -20,7 +21,7 @@ export default function PeopleListPage() {
   const router = useRouter();
   const [people, setPeople] = useState<Person[]>([]);
   const [events, setEvents] = useState<EventRecord[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // 로그인 체크
   useEffect(() => {
@@ -53,33 +54,49 @@ export default function PeopleListPage() {
       totalGiven,
       totalReceived
     };
-  }).filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  });
+
+  const filteredPeople = peopleSummary.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-6 pb-24 animate-fade-in bg-white min-h-screen">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">내 인맥 관리</h1>
 
-      {/* 검색 바 */}
+      {/* 검색바 */}
       <div className="relative mb-8 group">
-        <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+        </div>
         <input 
           type="text" 
-          placeholder="이름으로 검색..." 
-          className="w-full pl-12 pr-4 py-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary transition-all font-medium"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="지인 이름을 검색해 보세요..."
+          className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 font-medium"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
+        {searchTerm && (
+          <button 
+            onClick={() => setSearchTerm("")}
+            className="absolute inset-y-0 right-4 flex items-center text-gray-400 h-full px-1"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* 지인 리스트 */}
       <div className="space-y-4">
-        {peopleSummary.length === 0 ? (
+        {filteredPeople.length === 0 ? (
           <div className="py-20 text-center opacity-50">
             <UserGroupIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-sm">등록된 지인이 없거나 검색 결과가 없습니다.</p>
+            <p className="text-sm">
+              {searchTerm ? `'${searchTerm}'에 대한 검색 결과가 없습니다.` : "등록된 지인이 없습니다."}
+            </p>
           </div>
         ) : (
-          peopleSummary.map((p) => (
+          filteredPeople.map((p) => (
             <Link key={p.id} href={`/people/${p.id}`}>
               <div className="card flex items-center justify-between group hover:border-primary transition-all">
                 <div className="flex items-center gap-4">

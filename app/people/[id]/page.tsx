@@ -15,7 +15,9 @@ import {
   CalendarDaysIcon,
   BanknotesIcon,
   PhoneIcon,
-  ChatBubbleBottomCenterTextIcon
+  ChatBubbleBottomCenterTextIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
 import EditEventModal from "@/components/EditEventModal";
 
@@ -26,6 +28,7 @@ export default function PersonDetailPage() {
   const [person, setPerson] = useState<Person | null>(null);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // 편집 모달 관련 상태
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -63,6 +66,13 @@ export default function PersonDetailPage() {
   const totalGiven = events.filter(e => e.direction === "give").reduce((s, e) => s + e.amount, 0);
   const totalReceived = events.filter(e => e.direction === "receive").reduce((s, e) => s + e.amount, 0);
 
+  const filteredEvents = events.filter(e => {
+    const type = e.type.toLowerCase();
+    const memo = (e.memo || "").toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return type.includes(search) || memo.includes(search);
+  });
+
   return (
     <div className="p-6 pb-24 animate-fade-in bg-white min-h-screen">
       {/* 헤더 */}
@@ -98,6 +108,28 @@ export default function PersonDetailPage() {
         </div>
       </div>
 
+      {/* 검색바 */}
+      <div className="relative mb-10 group">
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+        </div>
+        <input 
+          type="text" 
+          placeholder="항목이나 메모 내용으로 검색..."
+          className="w-full bg-gray-50 border-none rounded-2xl py-4 pl-12 pr-12 text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-400 font-bold"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => setSearchTerm("")}
+            className="absolute inset-y-0 right-4 flex items-center text-gray-400 h-full px-1"
+          >
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
       {/* 기록 리스트 */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-900">전체 기록 <span className="text-primary text-sm ml-1">{events.length}건</span></h2>
@@ -111,10 +143,12 @@ export default function PersonDetailPage() {
       </div>
 
       <div className="space-y-4">
-        {events.length === 0 ? (
-          <p className="py-20 text-center text-gray-300 font-medium">아직 기록된 경조사가 없습니다.</p>
+        {filteredEvents.length === 0 ? (
+          <p className="py-20 text-center text-gray-300 font-medium">
+            {searchTerm ? `'${searchTerm}'에 대한 검색 결과가 없습니다.` : "아직 기록된 경조사가 없습니다."}
+          </p>
         ) : (
-          events.map(event => (
+          filteredEvents.map(event => (
             <div 
               key={event.id} 
               className="relative pl-8 pb-8 border-l-2 border-gray-100 last:pb-0 cursor-pointer group"
