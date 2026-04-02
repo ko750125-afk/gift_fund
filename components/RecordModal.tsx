@@ -21,6 +21,7 @@ interface RecordModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  initialDirection?: EventDirection;
 }
 
 /**
@@ -28,13 +29,21 @@ interface RecordModalProps {
  * - 보냄/받음 버튼을 없애고 직관적인 위아래 배치로 변경
  * - '낼 때'는 위쪽 간단 입력, '받을 때(나의 경조사)'는 아래쪽 단체 입력 버튼으로 구성
  */
-export default function RecordModal({ isOpen, onClose, userId }: RecordModalProps) {
+export default function RecordModal({ isOpen, onClose, userId, initialDirection }: RecordModalProps) {
   // 1. 상태 관리
   // 대표님 지침: 나가는 돈(give)은 기본 단일 입력, 들어오는 돈(receive)은 나의 경조사(Bulk) 모드
-  const [direction, setDirection] = useState<EventDirection>("give");
-  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [direction, setDirection] = useState<EventDirection>(initialDirection || "give");
+  const [isBulkMode, setIsBulkMode] = useState(initialDirection === "receive");
   
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // initialDirection이 변경될 때 상태 업데이트
+  useEffect(() => {
+    if (isOpen) {
+      setDirection(initialDirection || "give");
+      setIsBulkMode(initialDirection === "receive");
+    }
+  }, [initialDirection, isOpen]);
   
   // 단일 입력 전용 상태 (기존 context 대체)
   const [pName, setPName] = useState("");
@@ -65,18 +74,26 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
   useEffect(() => {
     if (typeof window !== "undefined" && (window as any).webkitSpeechRecognition) {
       const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true; // 대표님 요청: 수동으로 끌 때까지 계속 켜두기
       recognition.lang = "ko-KR";
-      recognition.interimResults = false;
+      recognition.interimResults = true; // 실시간 피드백
+      
       recognition.onstart = () => setIsRecording(true);
       recognition.onend = () => setIsRecording(false);
+      
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
+        let finalTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
         
-        if (focusedField === "bulk") {
-          setBulkText(prev => prev ? `${prev}\n${transcript}` : transcript);
+        if (finalTranscript && focusedField === "bulk") {
+          setBulkText(prev => prev ? `${prev}\n${finalTranscript.trim()}` : finalTranscript.trim());
         }
       };
+      
       recognitionRef.current = recognition;
     }
   }, [focusedField]);
@@ -87,7 +104,7 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
     if (isRecording) {
       recognitionRef.current?.stop();
     } else {
-      setTimeout(() => recognitionRef.current?.start(), 100);
+      recognitionRef.current?.start();
     }
   };
 

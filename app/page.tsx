@@ -8,6 +8,7 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   XMarkIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 // --- 간소화된 커스텀 훅 및 컴포넌트 ---
@@ -34,6 +35,7 @@ export default function Dashboard() {
     loading: dataLoading
   } = useEvents(user?.uid);
 
+  const [activeTab, setActiveTab] = useState<"give" | "receive">("give");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
@@ -78,7 +80,7 @@ export default function Dashboard() {
           <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
           <input 
             type="text" 
-            placeholder="이름이나 행사를 검색하세요"
+            placeholder="이름이나 단체명을 검색하세요"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#111] border-2 border-[#333] rounded-2xl pl-14 pr-12 py-5 text-xl font-bold text-white placeholder:text-slate-600 focus:border-blue-600 transition-all"
@@ -111,16 +113,43 @@ export default function Dashboard() {
       <section className="animate-up">
         <div className="flex items-center gap-2 mb-6 px-1">
           <div className="w-1.5 h-5 bg-blue-600 rounded-full"></div>
-          <h2 className="text-lg font-black text-white tracking-tight">최근 기록 내역</h2>
+          <h2 className="text-lg font-black text-white tracking-tight">
+            {searchQuery ? "검색 결과" : activeTab === "give" ? "최근 보낸 내역" : "최근 받은 내역"}
+          </h2>
         </div>
 
         <EventList 
-          events={filteredEvents} 
+          events={searchQuery ? filteredEvents : filteredEvents.filter(e => e.direction === activeTab)} 
           peopleMap={peopleMap} 
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
         />
       </section>
+
+      {/* 5. 하단 네비게이션 */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14] border-t border-white/5 pb-8 pt-4 px-6 z-50 flex items-center justify-around backdrop-blur-md">
+        <button 
+          onClick={() => setActiveTab("give")}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "give" ? "text-rose-500 scale-110" : "text-slate-600 opacity-50"}`}
+        >
+          <div className={`p-2 rounded-xl ${activeTab === "give" ? "bg-rose-500/10" : ""}`}>
+            <PlusIcon className="w-6 h-6" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest">내가 낸 돈</span>
+        </button>
+        
+        <div className="w-px h-8 bg-white/5"></div>
+
+        <button 
+          onClick={() => setActiveTab("receive")}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "receive" ? "text-indigo-500 scale-110" : "text-slate-600 opacity-50"}`}
+        >
+          <div className={`p-2 rounded-xl ${activeTab === "receive" ? "bg-indigo-500/10" : ""}`}>
+            <SparklesIcon className="w-6 h-6" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest">나의 경조사</span>
+        </button>
+      </nav>
 
       {/* 모달: 편집 */}
       {selectedEvent && (
@@ -140,6 +169,7 @@ export default function Dashboard() {
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}
         userId={user.uid}
+        initialDirection={activeTab}
       />
     </div>
   );
