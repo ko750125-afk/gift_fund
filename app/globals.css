@@ -1,97 +1,98 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #818CF8; /* Electric Indigo */
-  --color-secondary: #F43F5E; /* Rose */
-  --color-accent: #10B981; /* Emerald */
-  --color-background: #0B0E14; /* Deep Charcoal Black */
-  --color-surface: #1E293B; /* Slate-800 */
+  --color-primary: #2563EB;   /* Blue-600 */
+  --color-secondary: #DC2626; /* Red-600 */
+  --color-background: #000000;/* Pure Black for Contrast */
+  --color-surface: #121212;   /* Very Dark Slate */
 }
 
 :root {
   --max-width: 480px;
-  --glass-dark-bg: rgba(30, 41, 59, 0.4);
-  --glass-dark-border: rgba(255, 255, 255, 0.05);
-  --premium-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  --card-bg: #1A1A1A;
+  --card-border: #333333;
 }
 
 body {
   background-color: var(--color-background);
-  color: #F1F5F9; /* Slate-100 */
+  color: #FFFFFF;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
-  line-height: 1.5;
-  overflow-x: hidden;
+  line-height: 1.6;
+  font-size: 18px; /* 기본 폰트 크기 업 (가독성 강조) */
 }
 
-/* 프리미엄 다크 앱 컨테이너 */
+/* 초심플 다크 앱 컨테이너 */
 .app-container {
   max-width: var(--max-width);
   margin: 0 auto;
   min-height: 100vh;
   background-color: var(--color-background);
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  padding: 0 16px;
 }
 
-.main-content {
-  flex: 1;
-  padding-bottom: 110px;
-}
-
-/* 럭셔리 다크 카드 디자인 */
+/* 고대비 카드 디자인 (심플) */
 .premium-card {
-  background: var(--glass-dark-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 28px;
-  padding: 24px;
-  border: 1px solid var(--glass-dark-border);
-  box-shadow: var(--premium-shadow);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid var(--card-border); /* 더 굵은 테두리 */
+  margin-bottom: 16px;
 }
 
 .premium-card:active {
-  transform: scale(0.97);
-  background: rgba(30, 41, 59, 0.6);
+  border-color: #555555;
+  background: #252525;
 }
 
-/* 텍스트 그라데이션 */
-.text-premium {
-  background: linear-gradient(135deg, #FFF 0%, #94A3B8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* 텍스트 강조 */
+.text-important {
+  font-weight: 900;
+  letter-spacing: -0.02em;
 }
 
-/* 애니메이션 */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
+/* 버튼 디자인 (크고 명확하게) */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  text-align: center;
+  font-size: 20px;
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  font-weight: 800;
+  text-align: center;
+  font-size: 20px;
+}
+
+/* 애니메이션 최소화 (심플함 유지) */
+.animate-up {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-up {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* 입력창 고도화 (큼직함) */
+input {
+  background: #111111 !important;
+  border: 2px solid #333333 !important;
+  color: white !important;
+  padding: 16px !important;
+  border-radius: 12px !important;
+  font-size: 18px !important;
 }
 
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-
-/* 스크롤바 커스텀 */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 10px;
-}
-
-/* 스타일링 요소 */
-.glow-indigo {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-}
-
-input::placeholder {
-  color: #475569;
+input:focus {
+  border-color: var(--color-primary) !important;
+  outline: none;
 }

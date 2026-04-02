@@ -13,12 +13,10 @@ import {
   ArrowsUpDownIcon,
   TagIcon,
   CalendarDaysIcon,
-  BanknotesIcon,
   PhoneIcon,
   ChatBubbleBottomCenterTextIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  UserCircleIcon,
   ArrowUpRightIcon
 } from "@heroicons/react/24/outline";
 import EditEventModal from "@/components/EditEventModal";
@@ -26,7 +24,9 @@ import EditEventModal from "@/components/EditEventModal";
 export default function PersonDetailPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const id = params.id as string;
+  
   const [person, setPerson] = useState<Person | null>(null);
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
@@ -44,12 +44,14 @@ export default function PersonDetailPage() {
   useEffect(() => {
     if (!user || !id) return;
     
+    // 지인 정보 구독
     const unsubPeople = subscribePeople(user.uid, (people) => {
       const p = people.find(item => item.id === id);
       if (p) setPerson(p);
     });
 
-    const unsubEvents = subscribePersonEvents(id as string, sortBy, setEvents);
+    // 해당 지인의 경조사 내역 구독
+    const unsubEvents = subscribePersonEvents(id, sortBy, setEvents);
 
     return () => {
       unsubPeople();
@@ -57,11 +59,17 @@ export default function PersonDetailPage() {
     };
   }, [user, id, sortBy]);
 
-  if (loading || !user) return null;
+  if (loading || !user) return (
+    <div className="flex items-center justify-center min-h-screen bg-[#0B0E14]">
+      <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+    </div>
+  );
+
   if (!person) {
     return (
-      <div className="p-20 text-center bg-[#0B0E14] min-h-screen">
-        <p className="text-sm font-black text-slate-700 tracking-widest uppercase">정보를 찾을 수 없습니다</p>
+      <div className="p-20 text-center bg-[#0B0E14] min-h-screen flex flex-col items-center justify-center">
+        <p className="text-sm font-black text-slate-700 tracking-widest uppercase mb-6">정보를 찾을 수 없습니다</p>
+        <button onClick={() => router.push("/people")} className="text-indigo-400 font-bold underline">목록으로 돌아가기</button>
       </div>
     );
   }
@@ -78,7 +86,6 @@ export default function PersonDetailPage() {
 
   return (
     <div className="p-6 pb-28 animate-up bg-[#0B0E14] min-h-screen">
-      {/* 럭셔리 다크 헤더 */}
       <header className="flex items-center gap-4 mb-10 px-1">
         <button 
           onClick={() => router.back()} 
@@ -92,17 +99,9 @@ export default function PersonDetailPage() {
             <TagIcon className="w-3 h-3" /> {person.relationship}
           </p>
         </div>
-        <div className="flex gap-1.5">
-          <button className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/5 rounded-xl text-slate-500 hover:text-white transition-all">
-            <PhoneIcon className="w-5 h-5" />
-          </button>
-          <button className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/5 rounded-xl text-slate-500 hover:text-white transition-all">
-            <ChatBubbleBottomCenterTextIcon className="w-5 h-5" />
-          </button>
-        </div>
       </header>
 
-      {/* 종합 현황 보드 (Luxury Card) */}
+      {/* 종합 현황 */}
       <section className="premium-card bg-[#1E293B]/80 mb-12 relative overflow-hidden ring-1 ring-white/5">
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 blur-[60px]"></div>
         <div className="relative z-10 space-y-6">
@@ -124,7 +123,7 @@ export default function PersonDetailPage() {
         </div>
       </section>
 
-      {/* 검색 & 정렬 필터 */}
+      {/* 검색 바 */}
       <div className="relative mb-12 group">
         <div className="absolute inset-x-0 inset-y-0 bg-indigo-500/5 blur-2xl group-focus-within:bg-indigo-500/10 transition-all duration-700"></div>
         <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
@@ -142,7 +141,6 @@ export default function PersonDetailPage() {
         )}
       </div>
 
-      {/* 타임라인 헤더 */}
       <div className="flex items-center justify-between mb-8 px-1">
         <h2 className="text-lg font-black text-white tracking-tight uppercase">경조사 기록 일지</h2>
         <button 
@@ -154,7 +152,6 @@ export default function PersonDetailPage() {
         </button>
       </div>
 
-      {/* 럭셔리 타임라인 리스트 */}
       <div className="space-y-1">
         {filteredEvents.length === 0 ? (
           <div className="py-20 text-center premium-card border-dashed border-white/5 bg-transparent">
@@ -164,23 +161,22 @@ export default function PersonDetailPage() {
           filteredEvents.map((event, idx) => (
             <div 
               key={event.id} 
-              className="relative pl-10 pb-10 border-l border-white/5 last:pb-0 animate-up"
+              className="relative pl-10 pb-10 border-l border-white/5 last:pb-0 animate-up shadow-inner"
               style={{ animationDelay: `${idx * 0.05}s` }}
               onClick={() => {
                 setSelectedEvent(event);
                 setIsEditModalOpen(true);
               }}
             >
-              {/* 타임라인 커스텀 노드 */}
-              <div className={`absolute top-1 -left-[5.5px] w-2.5 h-2.5 rounded-full ring-4 ring-slate-950 shadow-[0_0_15px_rgba(0,0,0,1)] ${
-                event.direction === "give" ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+              <div className={`absolute top-1 -left-[5.5px] w-2.5 h-2.5 rounded-full ring-4 ring-slate-950 ${
+                event.direction === "give" ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]'
               }`} />
 
               <div className="premium-card bg-[#1E293B]/60 hover:bg-white/10 hover:border-white/10 active:scale-[0.98] transition-all cursor-pointer group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-2.5">
                     <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-lg border shadow-inner ${
-                      event.direction === "give" ? 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400' : 'bg-rose-500/10 border-rose-500/10 text-rose-400'
+                      event.direction === "give" ? 'bg-rose-500/10 border-rose-500/10 text-rose-500' : 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400'
                     }`}>
                       {event.direction === "give" ? "보냄" : "받음"}
                     </span>
@@ -193,7 +189,7 @@ export default function PersonDetailPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className={`text-2xl font-black italic tracking-tighter tabular-nums ${
-                    event.direction === "give" ? 'text-indigo-400' : 'text-rose-400'
+                    event.direction === "give" ? 'text-rose-500' : 'text-indigo-400'
                   }`}>
                     {event.direction === "give" ? "-" : "+"}{event.amount.toLocaleString()}
                     <small className="text-xs ml-1 opacity-40 non-italic">원</small>
@@ -206,15 +202,17 @@ export default function PersonDetailPage() {
         )}
       </div>
 
-      <EditEventModal 
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedEvent(null);
-        }}
-        event={selectedEvent}
-        personName={person.name}
-      />
+      {selectedEvent && (
+        <EditEventModal 
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedEvent(null);
+          }}
+          event={selectedEvent}
+          personName={person.name}
+        />
+      )}
     </div>
   );
 }

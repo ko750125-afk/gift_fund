@@ -10,14 +10,18 @@ import {
 import { Person, EventRecord, PersonSummary } from "@/types";
 import { 
   UserGroupIcon, 
-  ChevronRightIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
   UsersIcon,
-  ArrowUpRightIcon
+  ChevronRightIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+/**
+ * 초심플 인맥 목록 페이지
+ * - 큰 글씨, 명확한 고대비 디자인
+ * - '분석' 대신 '받은돈/보낸돈' 핵심 정보만 노출
+ */
 export default function PeopleListPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -43,8 +47,8 @@ export default function PeopleListPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0E14]">
-        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -66,83 +70,73 @@ export default function PeopleListPage() {
   );
 
   return (
-    <div className="p-6 pb-28 animate-up bg-[#0B0E14] min-h-screen">
-      {/* 럭셔리 다크 헤더 */}
-      <header className="flex items-center justify-between mb-10 px-1">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-indigo-400">
-            <UsersIcon className="w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">나의 인맥</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">인맥 자산 리포트</p>
-          </div>
-        </div>
+    <div className="max-w-md mx-auto bg-black min-h-screen p-4 pb-28">
+      {/* 초심플 헤더 */}
+      <header className="py-6 mb-4 border-b border-white/10 flex items-center gap-3">
+        <UsersIcon className="w-8 h-8 text-blue-500" />
+        <h1 className="text-2xl font-black text-white tracking-tight italic">인맥 검색</h1>
       </header>
 
-      {/* 프리미엄 검색바 */}
-      <div className="relative mb-8 group">
-        <div className="absolute inset-0 bg-indigo-500/5 blur-2xl group-focus-within:bg-indigo-500/10 transition-all duration-700"></div>
-        <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
+      {/* 대형 검색바 */}
+      <div className="relative mb-8">
+        <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500" />
         <input 
           type="text" 
-          placeholder="지인 이름을 검색해 보세요..."
-          className="relative w-full h-16 bg-[#1E293B]/60 backdrop-blur-xl border border-white/5 rounded-[24px] pl-14 pr-12 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-indigo-500/30 transition-all"
+          placeholder="성함을 입력하세요"
+          className="w-full bg-[#111] border-2 border-[#333] rounded-2xl pl-14 pr-12 py-5 text-xl font-bold text-white placeholder:text-slate-700 focus:border-blue-600 transition-all"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {searchTerm && (
           <button 
             onClick={() => setSearchTerm("")}
-            className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+            className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 p-1"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
         )}
       </div>
 
-      {/* 지인 리스트 (Luxury Row) */}
-      <div className="space-y-4">
+      {/* 인맥 리스트 (심플 가독성) */}
+      <div className="space-y-3">
         {filteredPeople.length === 0 ? (
-          <div className="py-24 text-center premium-card border-dashed border-white/5 bg-transparent">
-            <UserGroupIcon className="w-14 h-14 mx-auto mb-4 text-slate-800" />
-            <p className="text-[11px] text-slate-600 font-black tracking-widest uppercase italic">
+          <div className="py-16 text-center bg-[#111] rounded-2xl border-2 border-dashed border-[#333]">
+            <UserGroupIcon className="w-10 h-10 mx-auto mb-4 text-slate-800" />
+            <p className="text-sm text-slate-600 font-bold uppercase tracking-widest italic">
               {searchTerm ? "검색 결과가 없습니다" : "등록된 인맥이 없습니다"}
             </p>
           </div>
         ) : (
           filteredPeople.map((p, idx) => (
-            <Link key={p.id} href={`/people/${p.id}`} className={`block animate-up`} style={{ animationDelay: `${idx * 0.05}s` }}>
-              <div className="premium-card flex items-center justify-between group hover:bg-white/10 hover:border-white/10 active:scale-95 transition-all">
+            <Link key={p.id} href={`/people/${p.id}`} className="block">
+              <div className="premium-card !p-5 flex items-center justify-between active:bg-[#222] transition-colors">
                 <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1E293B] to-[#0F172A] border border-white/5 flex items-center justify-center text-indigo-400 font-black text-xl group-hover:from-indigo-600 group-hover:to-indigo-400 group-hover:text-white transition-all shadow-xl">
+                  {/* 이름 첫 글자 배지 (크게) */}
+                  <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
                     {p.name.charAt(0)}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex flex-col">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-black text-white text-lg tracking-tight">
+                      <h3 className="font-black text-white text-xl tracking-tight">
                         {p.name}
                       </h3>
-                      <span className="text-[9px] font-black text-slate-500 bg-white/5 px-2 py-0.5 rounded-lg border border-white/5 group-hover:text-slate-300">
+                      <span className="text-[10px] font-black text-slate-500 bg-[#222] border border-[#333] px-2 py-0.5 rounded-lg">
                         {p.relationship}
                       </span>
                     </div>
                     <div className="flex gap-4">
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">보냄</span>
-                        <p className="text-sm font-black text-indigo-400">-{p.totalGiven.toLocaleString()}</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-black text-slate-600">보냄</span>
+                        <p className="text-sm font-black text-rose-500">-{p.totalGiven.toLocaleString()}</p>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">받음</span>
-                        <p className="text-sm font-black text-rose-400">+{p.totalReceived.toLocaleString()}</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] font-black text-slate-600">받음</span>
+                        <p className="text-sm font-black text-blue-400">+{p.totalReceived.toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <ArrowUpRightIcon className="w-5 h-5 text-slate-700 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                  <span className="text-[9px] font-black text-slate-700 italic">분석 완료</span>
-                </div>
+                <ChevronRightIcon className="w-6 h-6 text-slate-800" />
               </div>
             </Link>
           ))

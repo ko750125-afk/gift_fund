@@ -3,209 +3,126 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  subscribeEvents,
-  subscribePeople,
-  downloadAsCSV
-} from "@/lib/db";
 import { EventRecord } from "@/types";
 import {
-  ArrowDownTrayIcon,
-  ArrowsUpDownIcon,
-  UserCircleIcon,
-  PlusCircleIcon,
   MagnifyingGlassIcon,
+  PlusIcon,
   XMarkIcon,
-  QueueListIcon
 } from "@heroicons/react/24/outline";
+
+// --- 간소화된 커스텀 훅 및 컴포넌트 ---
+import { useEvents } from "@/hooks/useEvents";
+import EventList from "@/components/EventList";
 import EditEventModal from "@/components/EditEventModal";
 import RecordModal from "@/components/RecordModal";
+import { deleteEvent } from "@/lib/db";
 
+/**
+ * 초심플 대시보드 페이지
+ * - 어르신들도 사용하기 쉬운 큰 글씨와 명확한 버튼
+ * - 오직 "검색"과 "기록"에만 집중
+ */
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [events, setEvents] = useState<EventRecord[]>([]);
-  const [peopleMap, setPeopleMap] = useState<Map<string, string>>(new Map());
-  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
-  const [searchTerm, setSearchTerm] = useState("");
-  
+
+  const {
+    filteredEvents,
+    peopleMap,
+    searchQuery,
+    setSearchQuery,
+    loading: dataLoading
+  } = useEvents(user?.uid);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  useEffect(() => {
-    if (!user) return;
-
-    const unsubPeople = subscribePeople(user.uid, (people) => {
-      const pMap = new Map();
-      people.forEach(p => pMap.set(p.id, p.name));
-      setPeopleMap(pMap);
-    });
-
-    const unsubEvents = subscribeEvents(user.uid, sortBy, (data) => {
-      setEvents(data);
-    });
-
-    return () => {
-      unsubPeople();
-      unsubEvents();
-    };
-  }, [user, sortBy]);
-
-  if (loading || !user) {
+  // 심플 로딩
+  if (authLoading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0E14]">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 border-4 border-white/5 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  const filteredEvents = events.filter(e => {
-    const personName = peopleMap.get(e.personId)?.toLowerCase() || "";
-    const type = e.type.toLowerCase();
-    const memo = (e.memo || "").toLowerCase();
-    const search = searchTerm.toLowerCase();
-    
-    return personName.includes(search) || type.includes(search) || memo.includes(search);
-  });
+  const handleEditClick = (event: EventRecord) => {
+    setSelectedEvent(event);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (id: string) => {
+    if (confirm("정말로 이 기록을 삭제하시겠습니까?")) {
+      await deleteEvent(id);
+    }
+  };
 
   return (
-    <div className="p-6 pb-32 animate-up max-w-lg mx-auto bg-[#0B0E14] min-h-screen">
-      {/* 럭셔리 미니멀 헤더 */}
-      <header className="flex items-center justify-between mb-12">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-900/40 italic">
-            GP
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-white tracking-tight italic">나의 경조사 장부</h1>
-            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-0.5">Digital Ledger System</p>
-          </div>
-        </div>
-        <button 
-          onClick={() => downloadAsCSV(user.uid)}
-          className="w-11 h-11 flex items-center justify-center text-slate-500 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all"
-        >
-          <ArrowDownTrayIcon className="w-5 h-5" />
-        </button>
+    <div className="max-w-md mx-auto bg-black min-h-screen p-4 pb-24">
+      {/* 1. 간결한 헤더 */}
+      <header className="py-6 mb-4 border-b border-white/10 text-center">
+        <h1 className="text-3xl font-black text-white tracking-tight">나의 경조사 장부</h1>
+        <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-widest italic font-important">Digital Gift Ledger</p>
       </header>
 
-      {/* 1단계: 기록하기 (Main Action) */}
-      <section className="mb-14">
-        <button 
-          onClick={() => setIsRecordModalOpen(true)}
-          className="relative w-full py-12 bg-indigo-600 rounded-[40px] overflow-hidden group shadow-2xl shadow-indigo-900/40 transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-        >
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-700"></div>
-          <PlusCircleIcon className="w-14 h-14 text-white" />
-          <span className="text-2xl font-black text-white tracking-tight">경조사 기록하기</span>
-          <div className="w-12 h-1 bg-white/20 rounded-full"></div>
-        </button>
-      </section>
-
-      {/* 2단계: 검색하기 */}
-      <section className="mb-12">
-        <div className="flex items-center gap-2 mb-6 px-1">
-          <div className="w-1.5 h-5 bg-rose-500 rounded-full"></div>
-          <h2 className="text-lg font-black text-white tracking-tight italic">내역 찾아보기</h2>
-        </div>
-
-        <div className="relative group">
-          <div className="absolute inset-0 bg-white/5 blur-2xl group-focus-within:bg-white/10 transition-all duration-700"></div>
-          <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-7 h-7 text-slate-700 group-focus-within:text-indigo-400 transition-colors" />
+      {/* 2. 대형 검색창 (항상 노출) */}
+      <section className="mb-8">
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400" />
           <input 
             type="text" 
-            placeholder="이름이나 상황을 입력하세요..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="relative w-full h-20 bg-[#1E293B]/60 backdrop-blur-3xl border border-white/10 rounded-[30px] pl-16 pr-8 text-lg font-bold text-white placeholder:text-slate-800 focus:outline-none focus:border-indigo-500/30 transition-all shadow-inner"
+            placeholder="이름이나 행사를 검색하세요"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[#111] border-2 border-[#333] rounded-2xl pl-14 pr-12 py-5 text-xl font-bold text-white placeholder:text-slate-600 focus:border-blue-600 transition-all"
           />
-          {searchTerm && (
+          {searchQuery && (
             <button 
-              onClick={() => setSearchTerm("")}
-              className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 p-1"
             >
-              <XMarkIcon className="w-7 h-7" />
+              <XMarkIcon className="w-6 h-6" />
             </button>
           )}
         </div>
       </section>
 
-      {/* 3단계: 장부 리스트 */}
-      <section className="animate-up">
-        <div className="flex items-center justify-between mb-8 px-1">
-          <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">장부 타임라인</span>
-          <button 
-            onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
-            className="text-[10px] font-black text-indigo-400 flex items-center gap-2 px-4 py-2 bg-indigo-400/5 border border-indigo-400/10 rounded-full hover:bg-indigo-400/10 transition-all"
-          >
-            <ArrowsUpDownIcon className="w-3.5 h-3.5" />
-            {sortBy === "date" ? "최신순 정렬" : "금액순 정렬"}
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {filteredEvents.length === 0 ? (
-            <div className="py-32 text-center border-2 border-dashed border-white/5 rounded-[40px] bg-white/2">
-              <QueueListIcon className="w-20 h-20 text-slate-800/50 mx-auto mb-6" />
-              <p className="text-[11px] text-slate-700 font-black tracking-widest uppercase italic">등록된 기록이 없습니다</p>
-            </div>
-          ) : (
-            filteredEvents.map((event) => (
-              <div 
-                key={event.id} 
-                onClick={() => {
-                  setSelectedEvent(event);
-                  setIsEditModalOpen(true);
-                }}
-                className="premium-card flex items-center justify-between hover:bg-white/5 cursor-pointer active:scale-[0.98] group transition-all p-8 rounded-[35px] border-white/5 bg-[#1E293B]/40"
-              >
-                <div className="flex items-center gap-6">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-inner ${
-                    event.direction === "give" ? 'bg-indigo-500/10 text-indigo-400' : 'bg-rose-500/10 text-rose-400'
-                  }`}>
-                    <UserCircleIcon className="w-9 h-9" />
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-black text-white tracking-tighter">
-                        {peopleMap.get(event.personId) || "이름 없음"}
-                      </span>
-                      <span className="text-[10px] font-black text-slate-600 border border-white/5 px-2 py-0.5 rounded-lg bg-white/5">
-                        {event.type}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 font-bold mt-1 tracking-tight">{event.date}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`text-2xl font-black tracking-tighter italic ${
-                    event.direction === "give" ? 'text-indigo-400' : 'text-rose-400'
-                  }`}>
-                    {event.direction === "give" ? "-" : "+"}{event.amount.toLocaleString()}
-                  </p>
-                  {event.memo && (
-                    <p className="text-[10px] text-slate-700 truncate max-w-[120px] mt-1.5 font-bold italic group-hover:text-slate-500">
-                      "{event.memo}"
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+      {/* 3. 대형 기록 버튼 (중앙 집중) */}
+      <section className="mb-10">
+        <button 
+          onClick={() => setIsRecordModalOpen(true)}
+          className="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white py-8 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xl shadow-blue-900/20"
+        >
+          <div className="p-2 bg-white/20 rounded-full">
+            <PlusIcon className="w-8 h-8 text-white stroke-[3]" />
+          </div>
+          <span className="text-2xl font-black tracking-tight">새 경조사 기록하기</span>
+        </button>
       </section>
 
-      {/* 편집 모달 */}
+      {/* 4. 내역 리스트 (심플 가독성) */}
+      <section className="animate-up">
+        <div className="flex items-center gap-2 mb-6 px-1">
+          <div className="w-1.5 h-5 bg-blue-600 rounded-full"></div>
+          <h2 className="text-lg font-black text-white tracking-tight">최근 기록 내역</h2>
+        </div>
+
+        <EventList 
+          events={filteredEvents} 
+          peopleMap={peopleMap} 
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+        />
+      </section>
+
+      {/* 모달: 편집 */}
       {selectedEvent && (
         <EditEventModal 
           isOpen={isEditModalOpen}
@@ -218,7 +135,7 @@ export default function Dashboard() {
         />
       )}
 
-      {/* 기록 모달 */}
+      {/* 모달: 기록 */}
       <RecordModal 
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}
