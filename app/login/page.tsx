@@ -37,10 +37,10 @@ export default function LoginPage() {
           </svg>
         </div>
 
-        <h1 className="text-4xl font-black text-white mb-4 tracking-tight animate-up stagger-1">경조사 관리 매니저</h1>
+        <h1 className="text-4xl font-black text-white mb-4 tracking-tight animate-up stagger-1 italic">나의 경조사 장부</h1>
         <p className="text-slate-500 font-bold mb-14 leading-relaxed animate-up stagger-2">
-          복잡한 인맥과 경조사비 지출,<br />
-          이제 스마트하게 한 눈에 관리하세요.
+          복잡한 인맥과 경조사비,<br />
+          이제 디지털 장부로 스마트하게 기록하세요.
         </p>
 
         <button

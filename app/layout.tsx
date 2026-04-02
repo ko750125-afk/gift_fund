@@ -2,13 +2,22 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import BottomNav from "@/components/BottomNav";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "경조사 관리 | 편리한 인맥 관리 전문 서비스",
-  description: "스마트하게 관리하는 현대인의 경조사비 매니저",
+  title: "나의 경조사 장부 | 디지털 장부 서비스",
+  description: "스마트한 인맥 관리의 끝, 나의 경조사 장부",
+  themeColor: "#0B0E14",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "경조사",
+  },
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -41,7 +50,6 @@ export default function RootLayout({
             <main className="main-content">
               {children}
             </main>
-            <BottomNav />
           </div>
         </AuthProvider>
       </body>
