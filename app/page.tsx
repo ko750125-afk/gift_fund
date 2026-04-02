@@ -105,7 +105,7 @@ export default function Dashboard() {
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-tr from-indigo-500 to-rose-500 rounded-2xl blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
             <div className="relative w-14 h-14 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center text-white font-black text-2xl">
-              {user.displayName || "USER"}
+              {user.displayName?.split(' ')?.[0]?.slice(0, 5) || "USER"}
             </div>
           </div>
           <div>
