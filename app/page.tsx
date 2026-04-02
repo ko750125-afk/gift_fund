@@ -16,6 +16,7 @@ import { useEvents } from "@/hooks/useEvents";
 import EventList from "@/components/EventList";
 import EditEventModal from "@/components/EditEventModal";
 import RecordModal from "@/components/RecordModal";
+import Calendar from "@/components/Calendar";
 import { deleteEvent } from "@/lib/db";
 
 /**
@@ -117,6 +118,11 @@ export default function Dashboard() {
             {searchQuery ? "검색 결과" : activeTab === "give" ? "최근 보낸 내역" : "최근 받은 내역"}
           </h2>
         </div>
+
+        {/* 달력: 보낸 돈 탭이고 검색 전일 때만 노출 */}
+        {!searchQuery && activeTab === "give" && (
+          <Calendar events={filteredEvents} />
+        )}
 
         <EventList 
           events={searchQuery ? filteredEvents : filteredEvents.filter(e => e.direction === activeTab)} 
