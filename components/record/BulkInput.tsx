@@ -4,7 +4,8 @@ import { MicrophoneIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outl
 interface BulkInputProps {
   value: string;
   onChange: (val: string) => void;
-  onRecord: () => void;
+  onStartRecord: () => void;
+  onStopRecord: () => void;
   isRecording: boolean;
   parsedEntries: Array<{
     name: string;
@@ -22,7 +23,8 @@ interface BulkInputProps {
 const BulkInput = ({ 
   value, 
   onChange, 
-  onRecord, 
+  onStartRecord,
+  onStopRecord, 
   isRecording, 
   parsedEntries, 
   totalCount, 
@@ -57,13 +59,26 @@ const BulkInput = ({
         </div>
       )}
 
-      <button 
-        type="button" 
-        onClick={onRecord} 
-        className={`absolute right-4 bottom-4 w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${isRecording ? 'bg-rose-600 text-white animate-bounce-slow shadow-rose-900/40' : 'bg-[#222] text-slate-400 hover:text-white'}`}
-      >
-        <MicrophoneIcon className={`w-8 h-8 ${isRecording ? 'animate-pulse' : ''}`} />
-      </button>
+      <div className="absolute right-4 bottom-4 flex gap-2">
+        <button 
+          type="button" 
+          onClick={onStartRecord} 
+          disabled={isRecording}
+          className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shadow-xl transition-all ${isRecording ? 'bg-slate-800 text-slate-600 scale-90' : 'bg-rose-600 text-white hover:bg-rose-500 active:scale-95 shadow-rose-900/40'}`}
+        >
+          <MicrophoneIcon className="w-6 h-6" />
+          <span className="text-[8px] font-black mt-1">켜기</span>
+        </button>
+        <button 
+          type="button" 
+          onClick={onStopRecord} 
+          disabled={!isRecording}
+          className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shadow-xl transition-all ${!isRecording ? 'bg-slate-800 text-slate-600 scale-90' : 'bg-[#333] text-white hover:bg-[#444] active:scale-95 shadow-black/40 border border-white/10'}`}
+        >
+          <div className="w-4 h-4 bg-current rounded-sm mb-1"></div>
+          <span className="text-[8px] font-black">끄기</span>
+        </button>
+      </div>
     </div>
 
     {/* 실시간 파싱 결과 미리보기 (크게) */}

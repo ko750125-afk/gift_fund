@@ -66,17 +66,10 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
     return { paddingDays: padding, daysInMonth: dates };
   }, [year, month]);
 
-  // 금액 포맷터 (예: 95,000 -> 9.5만 / 5,000 -> 5천)
+  // 금액 포맷터 (예: 95,000 -> 10 / 50,000 -> 5)
   const formatAmount = (amnt: number) => {
-    if (amnt >= 10000) {
-      const man = amnt / 10000;
-      return `${parseFloat(man.toFixed(1))}만`;
-    }
-    if (amnt >= 1000) {
-      const chun = Math.floor(amnt / 1000);
-      return `${chun}천`;
-    }
-    return amnt.toLocaleString();
+    // 10,000원 단위로 반올림하여 숫자만 표시
+    return Math.round(amnt / 10000).toLocaleString();
   };
 
   const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
@@ -84,7 +77,7 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
   return (
     <div className="bg-[#111] border border-white/5 rounded-3xl p-6 mb-8 shadow-2xl overflow-hidden">
       {/* 헤더: 월 이동 */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-black text-white tracking-widest italic">
           {year}년 {month + 1}월 <span className="text-violet-500 font-bold ml-1 text-sm not-italic uppercase">Spent</span>
         </h3>
@@ -102,6 +95,13 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
+      </div>
+
+      {/* 단위 안내 */}
+      <div className="flex justify-end mb-6">
+        <p className="text-[10px] font-bold text-slate-500 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+          단위: 만원 <span className="mx-1 text-slate-700">|</span> 천원단위는 반올림
+        </p>
       </div>
 
       {/* 요일 라벨 */}
@@ -136,7 +136,7 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
               </span>
               {total > 0 && (
                 <div className={`rounded-md px-1 py-0.5 w-full text-center ${isSelected ? 'bg-violet-500/20' : 'bg-violet-500/10 border border-violet-500/20'}`}>
-                  <span className={`text-[9px] font-black leading-tight block truncate ${isSelected ? 'text-violet-300' : 'text-violet-400'}`}>
+                  <span className={`text-[10px] font-black leading-tight block truncate ${isSelected ? 'text-violet-300' : 'text-violet-400'}`}>
                     {formatAmount(total)}
                   </span>
                 </div>

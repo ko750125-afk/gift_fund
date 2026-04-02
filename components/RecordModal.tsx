@@ -59,6 +59,7 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
   
   const recognitionRef = useRef<any>(null);
   const manualStopRef = useRef(false);
+  const isRecordingActiveRef = useRef(false); // 실제 녹음 희망 상태 추적용
 
   // 2. 모드 전환 핸들러 (나의 경조사 버튼 클릭 시)
   const toggleMyEvent = () => {
@@ -81,20 +82,23 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
       
       recognition.onstart = () => {
         setIsRecording(true);
+        isRecordingActiveRef.current = true;
         manualStopRef.current = false;
       };
       
       recognition.onend = () => {
         // 대표님이 직접 끈 게 아니라면 자동으로 다시 시작 (모바일 안정성용)
-        if (!manualStopRef.current && isRecording) {
+        if (!manualStopRef.current && isRecordingActiveRef.current) {
            try { recognition.start(); } catch(e) {}
         } else {
            setIsRecording(false);
+           isRecordingActiveRef.current = false;
         }
       };
       
       recognition.onresult = (event: any) => {
         let finalTranscript = "";
+        // resultIndex 이후의 결과 중 확정된(isFinal) 결과만 1회성으로 처리
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript;
@@ -102,7 +106,12 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
         }
         
         if (finalTranscript && focusedField === "bulk") {
-          setBulkText(prev => prev ? `${prev}\n${finalTranscript.trim()}` : finalTranscript.trim());
+          // 중복 방지를 위해 마지막에 찍힌 텍스트와 비교하거나 index 기반 처리
+          setBulkText(prev => {
+            const trimmed = finalTranscript.trim();
+            if (!trimmed) return prev;
+            return prev ? `${prev}\n${trimmed}` : trimmed;
+          });
         }
       };
       
@@ -111,15 +120,20 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
   }, [focusedField, isRecording]);
 
 
-  const toggleRecording = (field: "bulk") => {
+  const startRecording = (field: "bulk") => {
     setFocusedField(field);
-    if (isRecording) {
-      manualStopRef.current = true;
-      recognitionRef.current?.stop();
-    } else {
-      manualStopRef.current = false;
+    manualStopRef.current = false;
+    isRecordingActiveRef.current = true;
+    try {
       recognitionRef.current?.start();
-    }
+    } catch(e) { /* 이미 켜져있는 경우 무시 */ }
+  };
+
+  const stopRecording = () => {
+    manualStopRef.current = true;
+    isRecordingActiveRef.current = false;
+    recognitionRef.current?.stop();
+    setIsRecording(false);
   };
 
   // 4. 스마트 파싱 로직 (벌크 모드)
@@ -263,7 +277,8 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
               
               <BulkInput 
                 value={bulkText} onChange={setBulkText}
-                onRecord={() => toggleRecording("bulk")}
+                onStartRecord={() => startRecording("bulk")}
+                onStopRecord={stopRecording}
                 isRecording={isRecording && focusedField === "bulk"}
                 parsedEntries={parsedEntries}
                 totalCount={totalCount}
