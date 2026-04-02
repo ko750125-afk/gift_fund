@@ -3,14 +3,14 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  subscribeEvents, 
-  subscribePeople, 
-  downloadAsCSV 
+import {
+  subscribeEvents,
+  subscribePeople,
+  downloadAsCSV
 } from "@/lib/db";
 import { EventRecord, Person } from "@/types";
-import { 
-  ArrowDownTrayIcon, 
+import {
+  ArrowDownTrayIcon,
   ArrowsUpDownIcon,
   UserCircleIcon,
   PlusCircleIcon,
@@ -29,7 +29,7 @@ export default function Dashboard() {
   const [peopleMap, setPeopleMap] = useState<Map<string, string>>(new Map());
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
 
@@ -93,7 +93,7 @@ export default function Dashboard() {
     const type = e.type.toLowerCase();
     const memo = (e.memo || "").toLowerCase();
     const search = searchTerm.toLowerCase();
-    
+
     return personName.includes(search) || type.includes(search) || memo.includes(search);
   });
 
@@ -122,7 +122,7 @@ export default function Dashboard() {
           <button className="w-11 h-11 flex items-center justify-center text-slate-400 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
             <BellIcon className="w-6 h-6" />
           </button>
-          <button 
+          <button
             onClick={() => downloadAsCSV(user.uid)}
             className="w-11 h-11 flex items-center justify-center text-slate-400 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all"
           >
@@ -145,7 +145,7 @@ export default function Dashboard() {
               <span className="text-lg ml-1 text-slate-400">원</span>
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
               <div className="flex items-center gap-1.5 mb-2">
@@ -171,7 +171,7 @@ export default function Dashboard() {
           <div className="w-1 h-5 bg-indigo-500 rounded-full"></div>
           <h2 className="text-lg font-black text-white tracking-tight">지출 분석 리포트</h2>
         </div>
-        
+
         <div className="premium-card">
           {budgetItems.length > 0 ? (
             <div className="space-y-7">
@@ -196,7 +196,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden p-[2px]">
-                      <div 
+                      <div
                         className={`h-full bg-gradient-to-r rounded-full transition-all duration-1000 ease-out ${colorScheme}`}
                         style={{ width: `${percentage}%` }}
                       />
@@ -211,7 +211,7 @@ export default function Dashboard() {
                 <ChartBarIcon className="w-8 h-8 text-slate-600" />
               </div>
               <p className="text-xs text-slate-500 font-bold leading-relaxed tracking-tight">
-                분석할 지출 데이터가 없습니다.<br/>
+                분석할 지출 데이터가 없습니다.<br />
                 <span className="text-indigo-400/60 transition-colors cursor-pointer" onClick={() => router.push('/add')}>내역을 추가해 보세요.</span>
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function Dashboard() {
             <div className="w-1 h-5 bg-rose-500 rounded-full"></div>
             <h2 className="text-lg font-black text-white tracking-tight">최근 경조사 내역</h2>
           </div>
-          <button 
+          <button
             onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
             className="text-[10px] font-black text-slate-400 flex items-center gap-1.5 bg-white/5 px-4 py-2 rounded-2xl border border-white/5 hover:bg-white/10 shadow-lg"
           >
@@ -239,15 +239,15 @@ export default function Dashboard() {
         <div className="relative mb-8 group">
           <div className="absolute inset-0 bg-indigo-500/5 blur-xl group-focus-within:bg-indigo-500/10 transition-all duration-700"></div>
           <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="누구인지, 또는 어떤 경조사인지 검색하세요..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="relative w-full h-16 bg-[#1E293B]/60 backdrop-blur-xl border border-white/5 rounded-[24px] pl-14 pr-6 text-sm font-bold text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition-all"
           />
           {searchTerm && (
-            <button 
+            <button
               onClick={() => setSearchTerm("")}
               className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
             >
@@ -265,8 +265,8 @@ export default function Dashboard() {
             </div>
           ) : (
             filteredEvents.map((event) => (
-              <div 
-                key={event.id} 
+              <div
+                key={event.id}
                 onClick={() => {
                   setSelectedEvent(event);
                   setIsEditModalOpen(true);
@@ -274,9 +274,8 @@ export default function Dashboard() {
                 className="premium-card flex items-center justify-between hover:bg-white/10 hover:border-white/10 cursor-pointer active:scale-95 group transition-all"
               >
                 <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-inner ${
-                    event.direction === "give" ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/10' : 'bg-rose-500/10 text-rose-400 border border-rose-500/10'
-                  }`}>
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-inner ${event.direction === "give" ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/10' : 'bg-rose-500/10 text-rose-400 border border-rose-500/10'
+                    }`}>
                     <UserCircleIcon className="w-8 h-8" />
                   </div>
                   <div>
@@ -292,9 +291,8 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`text-lg font-black tracking-tighter italic ${
-                    event.direction === "give" ? 'text-indigo-400' : 'text-rose-400'
-                  }`}>
+                  <p className={`text-lg font-black tracking-tighter italic ${event.direction === "give" ? 'text-indigo-400' : 'text-rose-400'
+                    }`}>
                     {event.direction === "give" ? "-" : "+"}{event.amount.toLocaleString()}
                   </p>
                   {event.memo && (
@@ -310,7 +308,7 @@ export default function Dashboard() {
       </section>
 
       {/* 편집 모달 */}
-      <EditEventModal 
+      <EditEventModal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
