@@ -80,7 +80,7 @@ export default function EditEventModal({ isOpen, onClose, event, personName }: E
             </div>
             <div>
               <h2 className="text-xl font-black text-white">{personName}</h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-1">Management Profile</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-1">상세 정보 관리</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 bg-white/5 rounded-2xl text-slate-400 hover:text-white transition-colors">
@@ -92,7 +92,7 @@ export default function EditEventModal({ isOpen, onClose, event, personName }: E
           {/* 금액 입력 */}
           <div>
             <label className="text-[11px] font-black text-slate-500 uppercase mb-3 block tracking-widest flex items-center gap-2">
-              <CurrencyDollarIcon className="w-4 h-4" /> Amount (KRW)
+              <CurrencyDollarIcon className="w-4 h-4" /> 금액 (원)
             </label>
             <div className="flex items-center gap-3 relative">
               <input 
@@ -109,7 +109,7 @@ export default function EditEventModal({ isOpen, onClose, event, personName }: E
           <div className="grid grid-cols-2 gap-5">
             <div>
               <label className="text-[11px] font-black text-slate-500 uppercase mb-3 block tracking-widest flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4" /> Date
+                <CalendarIcon className="w-4 h-4" /> 날짜
               </label>
               <input 
                 type="date" 
@@ -121,15 +121,15 @@ export default function EditEventModal({ isOpen, onClose, event, personName }: E
             </div>
             <div>
               <label className="text-[11px] font-black text-slate-500 uppercase mb-3 block tracking-widest flex items-center gap-2">
-                <TagIcon className="w-4 h-4" /> Category
+                <TagIcon className="w-4 h-4" /> 카테고리
               </label>
               <select 
                 className="w-full p-5 bg-white/5 border border-white/5 rounded-2xl outline-none focus:border-indigo-500/50 focus:bg-white/10 font-bold text-white text-sm appearance-none cursor-pointer transition-all"
                 value={type}
                 onChange={(e) => setType(e.target.value as EventType)}
               >
-                <option value="결혼">결혼</option>
-                <option value="장례">장례</option>
+                <option value="결혼식">결혼식</option>
+                <option value="장례식">장례식</option>
                 <option value="돌잔치">돌잔치</option>
                 <option value="기타">기타</option>
               </select>
@@ -139,11 +139,11 @@ export default function EditEventModal({ isOpen, onClose, event, personName }: E
           {/* 메모 */}
           <div>
             <label className="text-[11px] font-black text-slate-500 uppercase mb-3 block tracking-widest flex items-center gap-2">
-              <DocumentTextIcon className="w-4 h-4" /> Description
+              <DocumentTextIcon className="w-4 h-4" /> 메모
             </label>
             <input 
               type="text" 
-              placeholder="상세 내용을 입력해 주세요"
+              placeholder="추가 내용을 입력하세요"
               className="w-full p-5 bg-white/5 border border-white/5 rounded-2xl outline-none focus:border-indigo-500/50 focus:bg-white/10 font-bold text-white text-sm transition-all"
               value={memo}
               onChange={(e) => setMemo(e.target.value)}

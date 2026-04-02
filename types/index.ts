@@ -16,7 +16,7 @@ export interface Person {
   createdAt: any;       // 생성일
 }
 
-export type EventType = "결혼" | "장례" | "돌잔치" | "기타";
+export type EventType = "결혼식" | "장례식" | "돌잔치" | "기타";
 export type EventDirection = "give" | "receive";
 
 export interface EventRecord {

@@ -7,8 +7,8 @@ import BottomNav from "@/components/BottomNav";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "경조사 관리 비서 | Gyeongsajobi",
-  description: "대표님의 스마트한 경조사비 관리 앱",
+  title: "경조사 관리 | 편리한 인맥 관리 전문 서비스",
+  description: "스마트하게 관리하는 현대인의 경조사비 매니저",
 };
 
 export default function RootLayout({

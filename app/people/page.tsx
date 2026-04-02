@@ -74,8 +74,8 @@ export default function PeopleListPage() {
             <UsersIcon className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">지명 내역</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Networking Asset Profiling</p>
+            <h1 className="text-2xl font-black text-white tracking-tight">나의 인맥</h1>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">인맥 자산 리포트</p>
           </div>
         </div>
       </header>
@@ -107,7 +107,7 @@ export default function PeopleListPage() {
           <div className="py-24 text-center premium-card border-dashed border-white/5 bg-transparent">
             <UserGroupIcon className="w-14 h-14 mx-auto mb-4 text-slate-800" />
             <p className="text-[11px] text-slate-600 font-black tracking-widest uppercase italic">
-              {searchTerm ? "No search results match" : "No network data available"}
+              {searchTerm ? "검색 결과가 없습니다" : "등록된 인맥이 없습니다"}
             </p>
           </div>
         ) : (
@@ -129,11 +129,11 @@ export default function PeopleListPage() {
                     </div>
                     <div className="flex gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">OUT</span>
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">보냄</span>
                         <p className="text-sm font-black text-indigo-400">-{p.totalGiven.toLocaleString()}</p>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">IN</span>
+                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter">받음</span>
                         <p className="text-sm font-black text-rose-400">+{p.totalReceived.toLocaleString()}</p>
                       </div>
                     </div>
@@ -141,7 +141,7 @@ export default function PeopleListPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <ArrowUpRightIcon className="w-5 h-5 text-slate-700 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                  <span className="text-[9px] font-black text-slate-700 italic">PROFILED</span>
+                  <span className="text-[9px] font-black text-slate-700 italic">분석 완료</span>
                 </div>
               </div>
             </Link>

@@ -176,8 +176,8 @@ export default function AddEventPage() {
   };
 
   const getAutoCategory = (text: string): EventType => {
-    if (text.includes("결혼") || text.includes("혼례")) return "결혼";
-    if (text.includes("상") || text.includes("장례") || text.includes("소천")) return "장례";
+    if (text.includes("결혼") || text.includes("웨딩")) return "결혼식";
+    if (text.includes("장례") || text.includes("상") || text.includes("조의")) return "장례식";
     if (text.includes("돌") || text.includes("백일")) return "돌잔치";
     return "기타";
   };
@@ -195,24 +195,24 @@ export default function AddEventPage() {
           >
             <ChevronLeftIcon className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
           </button>
-          <h1 className="text-xl font-black text-white tracking-tight">기록하기</h1>
+          <h1 className="text-xl font-black text-white tracking-tight">경조사 기록하기</h1>
         </div>
         
-        {/* 다크 모컬 선택 */}
+        {/* 입력 모드 선택 */}
         <div className="flex bg-white/5 p-1.5 rounded-[20px] border border-white/5 shadow-inner">
           <button 
             type="button" 
             onClick={() => setIsBulkMode(false)} 
-            className={`px-4 py-2 rounded-[14px] text-[10px] font-black tracking-widest transition-all ${!isBulkMode ? 'bg-indigo-600 shadow-xl text-white' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`px-4 py-2 rounded-[14px] text-[11px] font-black tracking-tight transition-all ${!isBulkMode ? 'bg-indigo-600 shadow-xl text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            SINGLE
+            하나씩
           </button>
           <button 
             type="button" 
             onClick={() => setIsBulkMode(true)} 
-            className={`px-4 py-2 rounded-[14px] text-[10px] font-black tracking-widest transition-all ${isBulkMode ? 'bg-indigo-600 shadow-xl text-white' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`px-4 py-2 rounded-[14px] text-[11px] font-black tracking-tight transition-all ${isBulkMode ? 'bg-indigo-600 shadow-xl text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            BULK
+            여러 명(메모장)
           </button>
         </div>
       </div>
@@ -221,27 +221,27 @@ export default function AddEventPage() {
         {/* 공통 상황 설정 섹션 */}
         <div className="premium-card bg-[#1E293B]/40 space-y-8 border-white/5">
           <section>
-            <label className="text-[11px] font-black text-slate-500 uppercase mb-4 block tracking-widest">1. Transaction Flow</label>
+            <label className="text-[11px] font-black text-slate-500 uppercase mb-4 block tracking-widest">1. 입출금 선택</label>
             <div className="grid grid-cols-2 gap-3">
               <button 
                 type="button" 
                 onClick={() => setDirection("give")} 
                 className={`py-5 rounded-2xl font-black text-xs transition-all border outline-none ${direction === "give" ? 'bg-white text-slate-900 border-white shadow-xl shadow-white/5' : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'}`}
               >
-                OUTGOING (-)
+                내가 낸 돈 (-)
               </button>
               <button 
                 type="button" 
                 onClick={() => setDirection("receive")} 
                 className={`py-5 rounded-2xl font-black text-xs transition-all border outline-none ${direction === "receive" ? 'bg-rose-500 text-white border-rose-500 shadow-xl shadow-rose-900/40' : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'}`}
               >
-                INCOMING (+)
+                내가 받은 돈 (+)
               </button>
             </div>
           </section>
 
           <section>
-            <label className="text-[11px] font-black text-slate-500 uppercase mb-4 block tracking-widest">2. Event Details</label>
+            <label className="text-[11px] font-black text-slate-500 uppercase mb-4 block tracking-widest">2. 무슨 경조사인가요? (공통 메모)</label>
             <div className="relative group">
               <div className="absolute inset-0 bg-indigo-500/5 blur-xl group-focus-within:bg-indigo-500/10 transition-all"></div>
               <input 
@@ -263,15 +263,15 @@ export default function AddEventPage() {
         </div>
 
         {!isBulkMode ? (
-          /* 한 명씩 입력 모드 (Luxury Single) */
+          /* 한 명씩 입력 모드 */
           <div className="space-y-8 animate-up stagger-1">
             <section className="text-center">
-              <label className="text-[11px] font-black text-slate-500 uppercase mb-6 block tracking-widest">3. Recipient Profiling</label>
+              <label className="text-[11px] font-black text-slate-500 uppercase mb-6 block tracking-widest">3. 누구에게 주었나요?</label>
               <div className="relative max-w-sm mx-auto group">
                 <div className="absolute inset-x-10 inset-y-0 bg-indigo-500/10 blur-3xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 <input 
                   type="text" 
-                  placeholder="이름 입력..." 
+                  placeholder="지인 이름 입력..." 
                   className="relative w-full p-8 bg-transparent border-b-2 border-white/10 outline-none focus:border-indigo-500 text-3xl font-black text-center text-white transition-all placeholder:text-slate-800" 
                   value={personName} 
                   onChange={(e) => setPersonName(e.target.value)} 
@@ -288,7 +288,7 @@ export default function AddEventPage() {
 
             <section className="premium-card bg-indigo-500/5 border-indigo-500/10 p-10 text-center relative overflow-hidden">
                <div className="absolute top-0 left-0 w-20 h-20 bg-indigo-500/10 blur-3xl"></div>
-               <label className="relative z-10 text-[11px] font-black text-indigo-400 uppercase mb-8 block tracking-widest">4. Resource Allocation</label>
+               <label className="relative z-10 text-[11px] font-black text-indigo-400 uppercase mb-8 block tracking-widest">4. 금액을 설정해 주세요</label>
                <div className="relative z-10 flex items-center justify-center gap-2 mb-10">
                  <input 
                     type="number" 
@@ -314,9 +314,9 @@ export default function AddEventPage() {
                <button 
                 type="button" 
                 onClick={() => setAmount(0)} 
-                className="relative z-10 mt-8 text-[10px] font-black text-slate-600 hover:text-slate-400 tracking-tighter transition-all uppercase"
+                className="relative z-10 mt-8 text-[11px] font-black text-slate-600 hover:text-slate-400 tracking-tighter transition-all"
                >
-                 Reset Amount
+                 금액 초기화
                </button>
             </section>
           </div>
@@ -325,17 +325,17 @@ export default function AddEventPage() {
           <div className="space-y-8 animate-up stagger-1">
             <div className="flex items-center justify-between px-1">
               <label className="text-[11px] font-black text-slate-500 uppercase flex items-center gap-2 tracking-widest">
-                <ClipboardDocumentListIcon className="w-4 h-4 text-indigo-400" /> Smart Ledger
+                <ClipboardDocumentListIcon className="w-4 h-4 text-indigo-400" /> 스마트 메모장
               </label>
               <div className="text-[9px] text-emerald-400 font-black bg-emerald-400/10 px-3 py-1.5 rounded-full flex items-center gap-2 border border-emerald-400/20">
-                <ShieldCheckIcon className="w-3.5 h-3.5" /> AI PARSING ACTIVE
+                <ShieldCheckIcon className="w-3.5 h-3.5" /> 실시간 자동 분석 중
               </div>
             </div>
 
             <div className="relative group">
               <div className="absolute inset-0 bg-indigo-500/10 blur-3xl opacity-20 group-focus-within:opacity-40 transition-opacity"></div>
               <textarea
-                placeholder="홍길동 5만&#13;&#10;김철수 결혼 100,000&#13;&#10;이영희 돌잔치 10만"
+                placeholder="홍길동 5만&#13;&#10;김철수 결혼식 100,000&#13;&#10;이영희 돌잔치 10만"
                 className="relative w-full h-80 p-8 bg-[#1E293B]/40 border border-white/5 rounded-[32px] outline-none focus:border-indigo-500/30 text-base font-bold text-white shadow-2xl leading-relaxed placeholder:text-slate-700 transition-all"
                 value={bulkText}
                 onChange={(e) => setBulkText(e.target.value)}
@@ -354,11 +354,11 @@ export default function AddEventPage() {
               <div className="premium-card bg-slate-900/80 border-indigo-500/20 shadow-indigo-900/20">
                 <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-8">
                   <div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Found Units</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">인식된 인원</span>
                     <span className="text-5xl font-black text-white">{totalCount}<small className="text-sm font-bold opacity-30 ml-2">명</small></span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Total Value</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">합계 금액</span>
                     <span className="text-5xl font-black text-indigo-400 italic tabular-nums">{totalAmount.toLocaleString()}<small className="text-sm font-bold opacity-30 ml-2">원</small></span>
                   </div>
                 </div>
@@ -379,7 +379,7 @@ export default function AddEventPage() {
                 </div>
                 <div className="mt-8 flex items-center justify-center gap-2">
                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></div>
-                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Live Parser Engine Synchronized</p>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">실시간 분석 엔진 동기화 중</p>
                 </div>
               </div>
             )}
@@ -389,7 +389,7 @@ export default function AddEventPage() {
         {/* 하단 제어 */}
         <div className="flex items-center justify-between px-4">
            <div className="flex items-center gap-2">
-              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Entry Date</label>
+              <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">경조사 날짜</label>
               <input 
                 type="date" 
                 className="bg-transparent border-none outline-none font-black text-slate-400 text-sm cursor-pointer" 
@@ -400,7 +400,7 @@ export default function AddEventPage() {
            </div>
         </div>
 
-        {/* 메인 커밋 버튼 */}
+        {/* 메인 기록 버튼 */}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -414,8 +414,8 @@ export default function AddEventPage() {
               <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
             ) : (
               <>
-                <PlusIcon className="w-7 h-7" />
-                <span className="text-xl font-black">{isBulkMode ? `COMMIT ${totalCount} RECORDS` : "SUBMIT NOW"}</span>
+                <PencilSquareIcon className="w-7 h-7" />
+                <span className="text-xl font-black">{isBulkMode ? `${totalCount}건 일괄 기록하기` : "기록 완료"}</span>
               </>
             )}
           </div>

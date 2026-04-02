@@ -105,17 +105,17 @@ export default function Dashboard() {
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-tr from-indigo-500 to-rose-500 rounded-2xl blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
             <div className="relative w-14 h-14 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center text-white font-black text-2xl">
-              {user.displayName?.[0] || "K"}
+              {user.displayName || "USER"}
             </div>
           </div>
           <div>
             <div className="flex items-center gap-1">
               <h1 className="text-xl font-bold text-white tracking-tight leading-tight">
-                {user.displayName || "대표"}님
+                반갑습니다!
               </h1>
-              <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded-full font-bold">VVIP</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-bold">Standard</span>
             </div>
-            <p className="text-sm text-slate-500 font-medium mt-1 italic">Premium Secretary active</p>
+            <p className="text-sm text-slate-500 font-medium mt-1 italic">오늘의 경조사를 확인하세요</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -136,8 +136,8 @@ export default function Dashboard() {
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[60px] -translate-y-1/2 translate-x-1/2"></div>
         <div className="relative z-10">
           <div className="flex justify-between items-center mb-1">
-            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Total Asset Profile</p>
-            <span className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2 py-0.5 rounded-full">ACTIVE</span>
+            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">전체 자산 흐름</p>
+            <span className="text-[10px] text-emerald-400 font-black bg-emerald-400/10 px-2 py-0.5 rounded-full">정상 작동 중</span>
           </div>
           <div className="flex items-baseline gap-2 mb-10">
             <h2 className="text-3xl font-black tabular-nums tracking-tight text-white">
@@ -169,7 +169,7 @@ export default function Dashboard() {
       <section className="mb-14 animate-up stagger-1">
         <div className="flex items-center gap-2 mb-6 px-1">
           <div className="w-1 h-5 bg-indigo-500 rounded-full"></div>
-          <h2 className="text-lg font-black text-white tracking-tight">Spending Report</h2>
+          <h2 className="text-lg font-black text-white tracking-tight">지출 분석 리포트</h2>
         </div>
         
         <div className="premium-card">
@@ -224,14 +224,14 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-6 px-1">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-rose-500 rounded-full"></div>
-            <h2 className="text-lg font-black text-white tracking-tight">Recent Activity</h2>
+            <h2 className="text-lg font-black text-white tracking-tight">최근 경조사 내역</h2>
           </div>
           <button 
             onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
             className="text-[10px] font-black text-slate-400 flex items-center gap-1.5 bg-white/5 px-4 py-2 rounded-2xl border border-white/5 hover:bg-white/10 shadow-lg"
           >
             <ArrowsUpDownIcon className="w-3.5 h-3.5 text-slate-500" />
-            {sortBy === "date" ? "LATEST" : "AMOUNT"}
+            {sortBy === "date" ? "날짜순" : "금액순"}
           </button>
         </div>
 
@@ -241,7 +241,7 @@ export default function Dashboard() {
           <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
           <input 
             type="text" 
-            placeholder="Search by name or keyword..."
+            placeholder="누구인지, 또는 어떤 경조사인지 검색하세요..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="relative w-full h-16 bg-[#1E293B]/60 backdrop-blur-xl border border-white/5 rounded-[24px] pl-14 pr-6 text-sm font-bold text-white placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition-all"
@@ -261,7 +261,7 @@ export default function Dashboard() {
           {filteredEvents.length === 0 ? (
             <div className="py-20 text-center premium-card border-dashed border-white/5 bg-transparent">
               <QueueListIcon className="w-12 h-12 text-slate-800 mx-auto mb-4" />
-              <p className="text-[11px] text-slate-600 font-black tracking-widest uppercase">No Records Found</p>
+              <p className="text-[11px] text-slate-600 font-black tracking-widest uppercase">작성된 기록이 없습니다</p>
             </div>
           ) : (
             filteredEvents.map((event) => (

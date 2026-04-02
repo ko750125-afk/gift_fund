@@ -61,7 +61,7 @@ export default function PersonDetailPage() {
   if (!person) {
     return (
       <div className="p-20 text-center bg-[#0B0E14] min-h-screen">
-        <p className="text-sm font-black text-slate-700 tracking-widest uppercase">Profile not found</p>
+        <p className="text-sm font-black text-slate-700 tracking-widest uppercase">정보를 찾을 수 없습니다</p>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function PersonDetailPage() {
         <div className="relative z-10 space-y-6">
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 opacity-60">총 지출 (OUT)</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 opacity-60">내가 보낸 총액</span>
               <span className="text-xl font-black text-white italic tracking-tighter">-{totalGiven.toLocaleString()}원</span>
             </div>
             <ArrowUpRightIcon className="w-5 h-5 text-indigo-500 rotate-90 opacity-40" />
@@ -116,7 +116,7 @@ export default function PersonDetailPage() {
           <div className="w-full h-px bg-white/5"></div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 opacity-60">총 수입 (IN)</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 opacity-60">내가 받은 총액</span>
               <span className="text-xl font-black text-rose-500 italic tracking-tighter">+{totalReceived.toLocaleString()}원</span>
             </div>
             <ArrowUpRightIcon className="w-5 h-5 text-rose-500 opacity-40" />
@@ -130,7 +130,7 @@ export default function PersonDetailPage() {
         <MagnifyingGlassIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-600 group-focus-within:text-indigo-400 transition-colors" />
         <input 
           type="text" 
-          placeholder="Filter activity by keyword..."
+          placeholder="기록된 내용을 검색해 보세요..."
           className="relative w-full h-15 bg-[#1E293B]/60 backdrop-blur-xl border border-white/5 rounded-[22px] pl-14 pr-12 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-indigo-500/30 transition-all shadow-inner"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -144,13 +144,13 @@ export default function PersonDetailPage() {
 
       {/* 타임라인 헤더 */}
       <div className="flex items-center justify-between mb-8 px-1">
-        <h2 className="text-lg font-black text-white tracking-tight uppercase">History Timeline</h2>
+        <h2 className="text-lg font-black text-white tracking-tight uppercase">경조사 기록 일지</h2>
         <button 
           onClick={() => setSortBy(sortBy === "date" ? "amount" : "date")}
           className="text-[9px] font-black text-slate-400 flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 hover:bg-white/10"
         >
           <ArrowsUpDownIcon className="w-3.5 h-3.5" />
-          {sortBy === "date" ? "LATEST" : "VALUE"}
+          {sortBy === "date" ? "날짜순" : "금액순"}
         </button>
       </div>
 
@@ -158,7 +158,7 @@ export default function PersonDetailPage() {
       <div className="space-y-1">
         {filteredEvents.length === 0 ? (
           <div className="py-20 text-center premium-card border-dashed border-white/5 bg-transparent">
-            <p className="text-[10px] text-slate-700 font-black tracking-[0.2em] uppercase italic">Zero transactions profiled</p>
+            <p className="text-[10px] text-slate-700 font-black tracking-[0.2em] uppercase italic">기록된 내역이 없습니다</p>
           </div>
         ) : (
           filteredEvents.map((event, idx) => (
@@ -182,7 +182,7 @@ export default function PersonDetailPage() {
                     <span className={`text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-lg border shadow-inner ${
                       event.direction === "give" ? 'bg-indigo-500/10 border-indigo-500/10 text-indigo-400' : 'bg-rose-500/10 border-rose-500/10 text-rose-400'
                     }`}>
-                      {event.direction === "give" ? "OUTGOING" : "INCOMING"}
+                      {event.direction === "give" ? "보냄" : "받음"}
                     </span>
                     <span className="text-base font-black text-white tracking-tight">{event.type}</span>
                   </div>
