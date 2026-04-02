@@ -35,7 +35,12 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
   const [isBulkMode, setIsBulkMode] = useState(false);
   
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [context, setContext] = useState(""); // 이름 + 행사 내용 (예: 종화 결혼식)
+  
+  // 단일 입력 전용 상태 (기존 context 대체)
+  const [pName, setPName] = useState("");
+  const [eventType, setEventType] = useState<EventType>("기타");
+  const [memo, setMemo] = useState("");
+
   const [amount, setAmount] = useState<number>(0);
   const [bulkText, setBulkText] = useState("");
   
@@ -68,14 +73,7 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         
-        if (focusedField === "context") {
-          // 이름과 행사 내용 (예: "종화 결혼식")
-          setContext(transcript);
-        } else if (focusedField === "amount") {
-          // 금액 파싱 (예: "오만" -> 50000)
-          const parsed = parseAmountFromSpeech(transcript);
-          if (parsed > 0) setAmount(parsed);
-        } else if (focusedField === "bulk") {
+        if (focusedField === "bulk") {
           setBulkText(prev => prev ? `${prev}\n${transcript}` : transcript);
         }
       };
@@ -83,32 +81,8 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
     }
   }, [focusedField]);
 
-  // 음성 금액 파싱 헬퍼
-  const parseAmountFromSpeech = (text: string): number => {
-    const cleaned = text.replace(/,/g, "").replace(/\s/g, "");
-    let amnt = 0;
-    
-    // "오만", "십만", "오만원" 등 처리
-    const numericPart = cleaned.match(/\d+/) ? parseInt(cleaned.match(/\d+/)![0]) : 0;
-    
-    if (cleaned.includes("만")) {
-      amnt = (numericPart || 1) * 10000;
-      if (cleaned.startsWith("오만")) amnt = 50000;
-      else if (cleaned.startsWith("십만")) amnt = 100000;
-       // 간단한 한글 숫자 처리
-       const koreanNumbers: Record<string, number> = { "일": 1, "이": 2, "삼": 3, "사": 4, "오": 5, "육": 6, "칠": 7, "팔": 8, "구": 9, "십": 10 };
-       for (const [key, val] of Object.entries(koreanNumbers)) {
-         if (cleaned.startsWith(key + "만")) amnt = val * 10000;
-       }
-    } else if (cleaned.includes("천")) {
-      amnt = (numericPart || 1) * 1000;
-    } else {
-      amnt = numericPart;
-    }
-    return amnt;
-  };
 
-  const toggleRecording = (field: "context" | "amount" | "bulk") => {
+  const toggleRecording = (field: "bulk") => {
     setFocusedField(field);
     if (isRecording) {
       recognitionRef.current?.stop();
@@ -167,23 +141,22 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
         }));
         await addEventsBatch(userId, batchData);
       } else {
-        if (!context.trim() || amount <= 0) throw new Error("내용과 금액을 확인해 주세요.");
+        if (!pName.trim() || amount < 0) throw new Error("이름과 금액을 확인해 주세요.");
         
-        // 이름과 상황을 분리해주는 스마트 로직
-        // 예: "종화 결혼식" -> 이름: 종화, 상황: 결혼식
-        const parts = context.split(" ");
-        const pName = parts[0];
-        const eventType = getAutoCategory(context);
-        
-        const personId = await getOrCreatePerson(userId, pName);
+        const personId = await getOrCreatePerson(userId, pName.trim());
         await addEvent({
-          userId, personId, type: eventType,
-          amount, direction, date, memo: context
+          userId, 
+          personId, 
+          type: eventType,
+          amount, 
+          direction, 
+          date, 
+          memo: memo.trim()
         });
       }
       
       onClose();
-      setContext(""); setAmount(0); setBulkText(""); backToSingleMode();
+      setPName(""); setAmount(0); setBulkText(""); setMemo(""); setEventType("기타"); backToSingleMode();
     } catch (error: any) {
       alert(error.message || "저장 중 오류가 발생했습니다.");
     } finally {
@@ -207,11 +180,10 @@ export default function RecordModal({ isOpen, onClose, userId }: RecordModalProp
           </div>
           
           <SingleInput 
-            context={context} onContextChange={setContext}
+            pName={pName} onPNameChange={setPName}
+            type={eventType} onTypeChange={setEventType}
             amount={amount} onAmountChange={setAmount}
-            onRecord={toggleRecording}
-            isRecording={isRecording && (focusedField === "context" || focusedField === "amount")}
-            focusedField={focusedField}
+            memo={memo} onMemoChange={setMemo}
           />
         </div>
 
