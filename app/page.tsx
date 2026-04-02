@@ -17,6 +17,7 @@ import EventList from "@/components/EventList";
 import EditEventModal from "@/components/EditEventModal";
 import RecordModal from "@/components/RecordModal";
 import Calendar from "@/components/Calendar";
+import ChatSection from "@/components/ChatSection";
 import { deleteEvent } from "@/lib/db";
 
 /**
@@ -147,6 +148,9 @@ export default function Dashboard() {
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
         />
+
+        {/* 6. 실시간 채팅 창 (신규 추가) */}
+        <ChatSection />
       </section>
 
       {/* 5. 하단 네비게이션 */}
