@@ -124,8 +124,8 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
 
   // 4. 스마트 파싱 로직 (벌크 모드)
   const parsedEntries = useMemo(() => {
-    // 숫자 뿐만 아니라 '오만', '십만' 등 한글 발음도 처리 가능하도록 확장
-    const regex = /([^\d\s\n\(\)][^\d\n\(\)]*?)\s*([\d,]+(?:만|천)?|[오십백천만]+)/g;
+    // 숫자 뿐만 아니라 '오만', '십만' 등 한글 발음 및 '원' 단위 포함 처리
+    const regex = /([^\d\s\n\(\)][^\d\n\(\)]*?)\s*([\d,]+(?:만|천)?|[오십백천만]+)\s*(?:원)?/g;
     const matches = Array.from(bulkText.matchAll(regex));
     
     return matches.map(match => {
@@ -133,8 +133,9 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
       let amnt = 0;
       let amountStr = match[2].replace(/,/g, "");
       
-      // 한글 금액 처리
-      const koreanUnits: Record<string, number> = { "오": 5, "십": 10, "백": 100, "천": 1000, "만": 10000 };
+      // '오만원' 등으로 들어올 경우 대비하여 '원' 제거 (regex에서 이미 걸러지지만 안전을 위해)
+      amountStr = amountStr.replace("원", "");
+
       if (amountStr === "오만") amnt = 50000;
       else if (amountStr === "십만") amnt = 100000;
       else if (amountStr === "오천") amnt = 5000;
