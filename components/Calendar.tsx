@@ -86,7 +86,7 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
       {/* 헤더: 월 이동 */}
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-xl font-black text-white tracking-widest italic">
-          {year}년 {month + 1}월 <span className="text-rose-500 font-bold ml-1 text-sm not-italic">支出</span>
+          {year}년 {month + 1}월 <span className="text-violet-500 font-bold ml-1 text-sm not-italic uppercase">Spent</span>
         </h3>
         <div className="flex items-center gap-3">
           <button 
@@ -129,14 +129,14 @@ export default function Calendar({ events, onDateClick, selectedDate }: Calendar
             <div 
               key={day} 
               onClick={() => handleDayClick(day)}
-              className={`flex flex-col items-center justify-start min-h-[48px] p-1 relative group cursor-pointer transition-all rounded-xl ${isSelected ? 'bg-rose-500/10 ring-1 ring-rose-500/30' : 'hover:bg-white/5'}`}
+              className={`flex flex-col items-center justify-start min-h-[48px] p-1 relative group cursor-pointer transition-all rounded-xl ${isSelected ? 'bg-violet-500/10 ring-1 ring-violet-500/30' : 'hover:bg-white/5'}`}
             >
-              <span className={`text-xs font-bold mb-1 ${isToday ? 'bg-rose-500 text-white w-5 h-5 flex items-center justify-center rounded-full' : isSelected ? 'text-rose-400' : 'text-slate-500'}`}>
+              <span className={`text-xs font-bold mb-1 ${isToday ? 'bg-violet-600 text-white w-5 h-5 flex items-center justify-center rounded-full' : isSelected ? 'text-violet-400' : 'text-slate-500'}`}>
                 {day}
               </span>
               {total > 0 && (
-                <div className={`rounded-md px-1 py-0.5 w-full text-center ${isSelected ? 'bg-rose-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
-                  <span className={`text-[9px] font-black leading-tight block truncate ${isSelected ? 'text-rose-300' : 'text-rose-400'}`}>
+                <div className={`rounded-md px-1 py-0.5 w-full text-center ${isSelected ? 'bg-violet-500/20' : 'bg-violet-500/10 border border-violet-500/20'}`}>
+                  <span className={`text-[9px] font-black leading-tight block truncate ${isSelected ? 'text-violet-300' : 'text-violet-400'}`}>
                     {formatAmount(total)}
                   </span>
                 </div>

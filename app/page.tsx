@@ -153,9 +153,9 @@ export default function Dashboard() {
       <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14] border-t border-white/5 pb-8 pt-4 px-6 z-50 flex items-center justify-around backdrop-blur-md">
         <button 
           onClick={() => { setActiveTab("give"); setSelectedDate(null); }}
-          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "give" ? "text-rose-500 scale-110" : "text-slate-600 opacity-50"}`}
+          className={`flex flex-col items-center gap-1 transition-all ${activeTab === "give" ? "text-violet-500 scale-110" : "text-slate-600 opacity-50"}`}
         >
-          <div className={`p-2 rounded-xl ${activeTab === "give" ? "bg-rose-500/10" : ""}`}>
+          <div className={`p-2 rounded-xl ${activeTab === "give" ? "bg-violet-500/10" : ""}`}>
             <PlusIcon className="w-6 h-6" />
           </div>
           <span className="text-[10px] font-black uppercase tracking-widest">내가 낸 돈</span>
