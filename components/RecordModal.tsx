@@ -189,27 +189,31 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
 
       <div className="flex-1 overflow-y-auto p-6 space-y-12 custom-scroll">
         
-        {/* === 상단: 보낼 때 (Single Mode) === */}
-        <div className={`transition-all duration-500 ${isBulkMode ? 'opacity-20 scale-95 pointer-events-none' : 'opacity-100'}`}>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1.5 h-5 bg-rose-500 rounded-full"></div>
-            <h3 className="text-lg font-black text-white italic">다른 사람 경조사 챙길 때</h3>
-          </div>
-          
-          <SingleInput 
-            pName={pName} onPNameChange={setPName}
-            type={eventType} onTypeChange={setEventType}
-            amount={amount} onAmountChange={setAmount}
-            memo={memo} onMemoChange={setMemo}
-          />
-        </div>
+        {!isBulkMode && (
+          <>
+            {/* === 상단: 보낼 때 (Single Mode) === */}
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1.5 h-5 bg-rose-500 rounded-full"></div>
+                <h3 className="text-lg font-black text-white italic">다른 사람 경조사 챙길 때</h3>
+              </div>
+              
+              <SingleInput 
+                pName={pName} onPNameChange={setPName}
+                type={eventType} onTypeChange={setEventType}
+                amount={amount} onAmountChange={setAmount}
+                memo={memo} onMemoChange={setMemo}
+              />
+            </div>
 
-        {/* 중첩 레이아웃을 위한 구분선 */}
-        <div className="flex items-center gap-4 py-2">
-          <div className="h-px bg-white/5 flex-1"></div>
-          <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">OR</span>
-          <div className="h-px bg-white/5 flex-1"></div>
-        </div>
+            {/* 중첩 레이아웃을 위한 구분선 */}
+            <div className="flex items-center gap-4 py-2">
+              <div className="h-px bg-white/5 flex-1"></div>
+              <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">OR</span>
+              <div className="h-px bg-white/5 flex-1"></div>
+            </div>
+          </>
+        )}
 
         {/* === 하단: 나의 경조사 (Bulk Mode) === */}
         <section>
