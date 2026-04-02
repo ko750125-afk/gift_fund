@@ -3,6 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import InAppBrowserGuide from "@/components/InAppBrowserGuide";
 
 /**
  * 초심플 로그인 페이지
@@ -29,6 +30,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-8 bg-black text-white">
+      {/* 인-앱 브라우저 감지 가이드 */}
+      <InAppBrowserGuide />
       
       <div className="w-full max-w-sm text-center">
         {/* 앱 로고 아이콘 - 심플 & 고대비 */}

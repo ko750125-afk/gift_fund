@@ -82,6 +82,24 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes simpleFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in {
+  animation: simpleFadeIn 0.5s ease-out forwards;
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s infinite ease-in-out;
+}
+
 /* 입력창 고도화 (큼직함) */
 input {
   background: #111111 !important;

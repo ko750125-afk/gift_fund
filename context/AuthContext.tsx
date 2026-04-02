@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { 
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged, 
   signOut, 
   GoogleAuthProvider, 
@@ -27,7 +29,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. 로그인 상태 실시간 감지
+    // 1. 리다이렉트 로그인 결과 처리
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log("리다이렉트 로그인 성공:", result.user.displayName);
+          router.push("/");
+        }
+      })
+      .catch((error) => {
+        console.error("리다이렉트 결과 처리 중 에러:", error);
+      });
+
+    // 2. 로그인 상태 실시간 감지
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -43,16 +57,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async () => {
     const provider = new GoogleAuthProvider();
-    // 가급적 계정 선택창이 뜨도록 설정합니다.
     provider.setCustomParameters({ prompt: 'select_account' });
     
     setLoading(true);
+    
+    // 모바일 여부 판단 (Regex)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     try {
-      // 리다이렉트 방식 대신 팝업 방식을 사용하여 도메인 간 리디렉션 문제를 해결합니다.
-      const result = await signInWithPopup(auth, provider);
-      if (result.user) {
-        console.log("로그인 성공:", result.user.displayName);
-        router.push("/");
+      if (isMobile) {
+        // 모바일은 팝업 차단이 많으므로 리다이렉트 방식을 사용합니다.
+        await signInWithRedirect(auth, provider);
+      } else {
+        // 데스크톱은 팝업 방식이 직관적입니다.
+        const result = await signInWithPopup(auth, provider);
+        if (result.user) {
+          console.log("팝업 로그인 성공:", result.user.displayName);
+          router.push("/");
+        }
       }
     } catch (error: any) {
       console.error("로그인 중 에러 발생:", error);
@@ -62,7 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         alert("브라우저에서 팝업이 차단되었습니다. 주소창 옆의 팝업 차단 아이콘을 눌러 허용해 주세요.");
       } else if (error.code === "auth/unauthorized-domain") {
         alert("현재 도메인이 승인되지 않았습니다. Firebase 콘솔 설정을 다시 확인해 주세요.");
-      } else if (error.code !== "auth/popup-closed-by-user") {
+      } else if (error.code === "auth/internal-error" && error.message.includes("403")) {
+        alert("현재 브라우저에서는 구글 로그인이 불가능합니다. 외부 브라우저(크롬, 사파리)로 접속해 주세요.");
+      } else if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
         alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
       }
     } finally {
