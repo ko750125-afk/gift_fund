@@ -56,6 +56,7 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
   const [isRecording, setIsRecording] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState<"context" | "amount" | "bulk">("context");
+  const [interimTranscript, setInterimTranscript] = useState("");
   
   const recognitionRef = useRef<any>(null);
   const manualStopRef = useRef(false);
@@ -93,31 +94,43 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
         } else {
            setIsRecording(false);
            isRecordingActiveRef.current = false;
+           setInterimTranscript(""); // 종료 시 중간 결과 비움
         }
       };
       
       recognition.onresult = (event: any) => {
         let finalTranscript = "";
-        // resultIndex 이후의 결과 중 확정된(isFinal) 결과만 1회성으로 처리
+        let interim = "";
+
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            finalTranscript += transcript;
+          } else {
+            interim += transcript;
           }
         }
         
+        // 실시간 중간 결과 반영
+        setInterimTranscript(interim);
+
         if (finalTranscript && focusedField === "bulk") {
-          // 중복 방지를 위해 마지막에 찍힌 텍스트와 비교하거나 index 기반 처리
           setBulkText(prev => {
             const trimmed = finalTranscript.trim();
             if (!trimmed) return prev;
             return prev ? `${prev}\n${trimmed}` : trimmed;
           });
+          setInterimTranscript(""); // 확정되면 중간 결과 초기화
         }
       };
       
       recognitionRef.current = recognition;
     }
-  }, [focusedField, isRecording]);
+
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, [focusedField]); // isRecording을 빼서 객체 재생성 방지
 
 
   const startRecording = (field: "bulk") => {
@@ -280,6 +293,7 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
                 onStartRecord={() => startRecording("bulk")}
                 onStopRecord={stopRecording}
                 isRecording={isRecording && focusedField === "bulk"}
+                interimTranscript={focusedField === "bulk" ? interimTranscript : ""}
                 parsedEntries={parsedEntries}
                 totalCount={totalCount}
                 totalAmount={totalAmount}

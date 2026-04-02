@@ -7,6 +7,7 @@ interface BulkInputProps {
   onStartRecord: () => void;
   onStopRecord: () => void;
   isRecording: boolean;
+  interimTranscript?: string;
   parsedEntries: Array<{
     name: string;
     amount: number;
@@ -26,6 +27,7 @@ const BulkInput = ({
   onStartRecord,
   onStopRecord, 
   isRecording, 
+  interimTranscript,
   parsedEntries, 
   totalCount, 
   totalAmount 
@@ -53,9 +55,16 @@ const BulkInput = ({
       ></textarea>
       
       {isRecording && (
-        <div className="absolute left-8 bottom-6 flex items-center gap-2 text-rose-500 font-black text-sm animate-pulse">
-          <div className="w-2 h-2 bg-rose-600 rounded-full"></div>
-          <span>음성 인식 중... (여러 명 연속 입력 가능)</span>
+        <div className="absolute left-8 bottom-6 right-36 flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-rose-500 font-black text-sm animate-pulse">
+            <div className="w-2 h-2 bg-rose-600 rounded-full"></div>
+            <span>음성 인식 중...</span>
+          </div>
+          {interimTranscript && (
+            <div className="text-blue-400 font-bold text-lg bg-blue-500/5 px-2 py-1 rounded-lg border border-blue-500/10 animate-fade-in truncate">
+              "{interimTranscript}"
+            </div>
+          )}
         </div>
       )}
 
