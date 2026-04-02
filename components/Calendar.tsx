@@ -54,11 +54,11 @@ export default function Calendar({ events }: CalendarProps) {
     return { paddingDays: padding, daysInMonth: dates };
   }, [year, month]);
 
-  // 금액 포맷터 (예: 100,000 -> 10만 / 5,000 -> 5천)
+  // 금액 포맷터 (예: 95,000 -> 9.5만 / 5,000 -> 5천)
   const formatAmount = (amnt: number) => {
     if (amnt >= 10000) {
-      const man = Math.floor(amnt / 10000);
-      return `${man}만`;
+      const man = amnt / 10000;
+      return `${parseFloat(man.toFixed(1))}만`;
     }
     if (amnt >= 1000) {
       const chun = Math.floor(amnt / 1000);
