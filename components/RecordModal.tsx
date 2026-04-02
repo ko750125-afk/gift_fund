@@ -58,6 +58,7 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
   const [focusedField, setFocusedField] = useState<"context" | "amount" | "bulk">("context");
   
   const recognitionRef = useRef<any>(null);
+  const manualStopRef = useRef(false);
 
   // 2. 모드 전환 핸들러 (나의 경조사 버튼 클릭 시)
   const toggleMyEvent = () => {
@@ -74,12 +75,23 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
   useEffect(() => {
     if (typeof window !== "undefined" && (window as any).webkitSpeechRecognition) {
       const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = true; // 대표님 요청: 수동으로 끌 때까지 계속 켜두기
+      recognition.continuous = true;
       recognition.lang = "ko-KR";
-      recognition.interimResults = true; // 실시간 피드백
+      recognition.interimResults = true;
       
-      recognition.onstart = () => setIsRecording(true);
-      recognition.onend = () => setIsRecording(false);
+      recognition.onstart = () => {
+        setIsRecording(true);
+        manualStopRef.current = false;
+      };
+      
+      recognition.onend = () => {
+        // 대표님이 직접 끈 게 아니라면 자동으로 다시 시작 (모바일 안정성용)
+        if (!manualStopRef.current && isRecording) {
+           try { recognition.start(); } catch(e) {}
+        } else {
+           setIsRecording(false);
+        }
+      };
       
       recognition.onresult = (event: any) => {
         let finalTranscript = "";
@@ -96,21 +108,24 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
       
       recognitionRef.current = recognition;
     }
-  }, [focusedField]);
+  }, [focusedField, isRecording]);
 
 
   const toggleRecording = (field: "bulk") => {
     setFocusedField(field);
     if (isRecording) {
+      manualStopRef.current = true;
       recognitionRef.current?.stop();
     } else {
+      manualStopRef.current = false;
       recognitionRef.current?.start();
     }
   };
 
   // 4. 스마트 파싱 로직 (벌크 모드)
   const parsedEntries = useMemo(() => {
-    const regex = /([^\d\s\n\(\)][^\d\n\(\)]*?)\s*([\d,]+(?:만|천)?)/g;
+    // 숫자 뿐만 아니라 '오만', '십만' 등 한글 발음도 처리 가능하도록 확장
+    const regex = /([^\d\s\n\(\)][^\d\n\(\)]*?)\s*([\d,]+(?:만|천)?|[오십백천만]+)/g;
     const matches = Array.from(bulkText.matchAll(regex));
     
     return matches.map(match => {
@@ -118,9 +133,14 @@ export default function RecordModal({ isOpen, onClose, userId, initialDirection 
       let amnt = 0;
       let amountStr = match[2].replace(/,/g, "");
       
-      if (amountStr.endsWith("만")) amnt = parseInt(amountStr.replace("만", "")) * 10000;
+      // 한글 금액 처리
+      const koreanUnits: Record<string, number> = { "오": 5, "십": 10, "백": 100, "천": 1000, "만": 10000 };
+      if (amountStr === "오만") amnt = 50000;
+      else if (amountStr === "십만") amnt = 100000;
+      else if (amountStr === "오천") amnt = 5000;
+      else if (amountStr.endsWith("만")) amnt = parseInt(amountStr.replace("만", "")) * 10000;
       else if (amountStr.endsWith("천")) amnt = parseInt(amountStr.replace("천", "")) * 1000;
-      else amnt = parseInt(amountStr);
+      else amnt = parseInt(amountStr) || 0;
 
       return { raw: match[0], name, amount: amnt, isValid: name !== "" && amnt > 0 };
     });

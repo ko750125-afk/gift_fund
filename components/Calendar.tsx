@@ -6,15 +6,27 @@ import { EventRecord } from '@/types';
 
 interface CalendarProps {
   events: EventRecord[];
+  onDateClick?: (date: string) => void;
+  selectedDate?: string | null;
 }
 
 /**
  * 📅 경조사 지출 현황 달력
  * - '내가 낸 돈'을 일자별로 합산하여 표시
- * - 월별 이동 기능 제공
+ * - 월별 이동 및 날짜 클릭 필터링 기능 제공
  */
-export default function Calendar({ events }: CalendarProps) {
+export default function Calendar({ events, onDateClick, selectedDate }: CalendarProps) {
   const [viewDate, setViewDate] = useState(new Date());
+
+  // ... (이동 로직 동일)
+
+  const handleDayClick = (day: number) => {
+    if (!onDateClick) return;
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    onDateClick(dateStr);
+  };
+
+  // ... (그리드 생성 및 포맷터 동일)
 
   // 현재 보고 있는 월의 정보 계산
   const year = viewDate.getFullYear();
@@ -110,21 +122,25 @@ export default function Calendar({ events }: CalendarProps) {
           const total = dailyTotals[day];
           const isToday = new Date().getFullYear() === year && new Date().getMonth() === month && new Date().getDate() === day;
           
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const isSelected = selectedDate === dateStr;
+
           return (
-            <div key={day} className="flex flex-col items-center justify-start min-h-[48px] relative group">
-              <span className={`text-xs font-bold mb-1 ${isToday ? 'bg-rose-500 text-white w-5 h-5 flex items-center justify-center rounded-full' : 'text-slate-500'}`}>
+            <div 
+              key={day} 
+              onClick={() => handleDayClick(day)}
+              className={`flex flex-col items-center justify-start min-h-[48px] p-1 relative group cursor-pointer transition-all rounded-xl ${isSelected ? 'bg-rose-500/10 ring-1 ring-rose-500/30' : 'hover:bg-white/5'}`}
+            >
+              <span className={`text-xs font-bold mb-1 ${isToday ? 'bg-rose-500 text-white w-5 h-5 flex items-center justify-center rounded-full' : isSelected ? 'text-rose-400' : 'text-slate-500'}`}>
                 {day}
               </span>
               {total > 0 && (
-                <div className="bg-rose-500/10 border border-rose-500/20 rounded-md px-1 py-0.5 w-full text-center">
-                  <span className="text-[9px] font-black text-rose-400 leading-tight block truncate">
+                <div className={`rounded-md px-1 py-0.5 w-full text-center ${isSelected ? 'bg-rose-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`}>
+                  <span className={`text-[9px] font-black leading-tight block truncate ${isSelected ? 'text-rose-300' : 'text-rose-400'}`}>
                     {formatAmount(total)}
                   </span>
                 </div>
               )}
-              
-              {/* 호버 효과 장식 */}
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 rounded-xl transition-all -z-10 pointer-events-none"></div>
             </div>
           );
         })}

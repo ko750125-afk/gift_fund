@@ -37,6 +37,7 @@ export default function Dashboard() {
   } = useEvents(user?.uid);
 
   const [activeTab, setActiveTab] = useState<"give" | "receive">("give");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
@@ -115,17 +116,33 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 mb-6 px-1">
           <div className="w-1.5 h-5 bg-blue-600 rounded-full"></div>
           <h2 className="text-lg font-black text-white tracking-tight">
-            {searchQuery ? "검색 결과" : activeTab === "give" ? "최근 보낸 내역" : "최근 받은 내역"}
+            {searchQuery ? "검색 결과" : selectedDate ? `${selectedDate} 내역` : activeTab === "give" ? "최근 보낸 내역" : "최근 받은 내역"}
           </h2>
+          {selectedDate && (
+            <button 
+              onClick={() => setSelectedDate(null)}
+              className="ml-auto text-[10px] font-bold text-slate-500 underline"
+            >
+              전체 내역 보기
+            </button>
+          )}
         </div>
 
         {/* 달력: 보낸 돈 탭이고 검색 전일 때만 노출 */}
         {!searchQuery && activeTab === "give" && (
-          <Calendar events={filteredEvents} />
+          <Calendar 
+            events={filteredEvents} 
+            selectedDate={selectedDate}
+            onDateClick={(date) => setSelectedDate(prev => prev === date ? null : date)}
+          />
         )}
 
         <EventList 
-          events={searchQuery ? filteredEvents : filteredEvents.filter(e => e.direction === activeTab)} 
+          events={
+            searchQuery ? filteredEvents : 
+            selectedDate ? filteredEvents.filter(e => e.date === selectedDate) :
+            filteredEvents.filter(e => e.direction === activeTab)
+          } 
           peopleMap={peopleMap} 
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
@@ -135,7 +152,7 @@ export default function Dashboard() {
       {/* 5. 하단 네비게이션 */}
       <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14] border-t border-white/5 pb-8 pt-4 px-6 z-50 flex items-center justify-around backdrop-blur-md">
         <button 
-          onClick={() => setActiveTab("give")}
+          onClick={() => { setActiveTab("give"); setSelectedDate(null); }}
           className={`flex flex-col items-center gap-1 transition-all ${activeTab === "give" ? "text-rose-500 scale-110" : "text-slate-600 opacity-50"}`}
         >
           <div className={`p-2 rounded-xl ${activeTab === "give" ? "bg-rose-500/10" : ""}`}>
@@ -147,7 +164,7 @@ export default function Dashboard() {
         <div className="w-px h-8 bg-white/5"></div>
 
         <button 
-          onClick={() => setActiveTab("receive")}
+          onClick={() => { setActiveTab("receive"); setSelectedDate(null); }}
           className={`flex flex-col items-center gap-1 transition-all ${activeTab === "receive" ? "text-indigo-500 scale-110" : "text-slate-600 opacity-50"}`}
         >
           <div className={`p-2 rounded-xl ${activeTab === "receive" ? "bg-indigo-500/10" : ""}`}>
