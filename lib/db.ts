@@ -11,11 +11,10 @@ import {
   writeBatch,
   doc,
   updateDoc,
-  deleteDoc,
-  limit
+  deleteDoc
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { Person, EventRecord, EventType, EventDirection, ChatMessage } from "@/types";
+import { Person, EventRecord, EventType, EventDirection } from "@/types";
 
 // --- 1. 지인(Person) 관련 로직 ---
 
@@ -201,37 +200,4 @@ export const addEventsBatch = async (userId: string, eventDetails: any[]) => {
     console.error("배치 저장 중 에러:", error);
     throw error;
   }
-};
-
-
-// --- 4. 실시간 채팅 관련 로직 ---
-
-// 메시지 전송
-export const sendMessage = async (message: Omit<ChatMessage, "id" | "createdAt">) => {
-  try {
-    await addDoc(collection(db, "messages"), {
-      ...message,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("메시지 전송 중 에러:", error);
-    throw error;
-  }
-};
-
-// 실시간 메시지 구독 (최신 50개)
-export const subscribeMessages = (callback: (messages: ChatMessage[]) => void) => {
-  const q = query(
-    collection(db, "messages"),
-    orderBy("createdAt", "asc"), // 오래된 순으로 가져와서 아래로 쌓기
-    limit(50)
-  );
-
-  return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as ChatMessage[];
-    callback(messages);
-  });
 };

@@ -31,12 +31,8 @@ export interface EventRecord {
   createdAt: any;       // 생성일
 }
 
-// 실시간 채팅 메시지 설계도
-export interface ChatMessage {
-  id?: string;
-  userId: string;
-  userName: string;
-  userPhoto: string | null;
-  text: string;
-  createdAt: any;
+// 화면 표시용 지인 요약 정보
+export interface PersonSummary extends Person {
+  totalGiven: number;   // 내가 준 총 금액
+  totalReceived: number; // 내가 받은 총 금액
 }
